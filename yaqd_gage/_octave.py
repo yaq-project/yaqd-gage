@@ -13,8 +13,6 @@ class Octave(Base):
         super().__init__(name, config, config_filepath)
         # Perform any unique initialization
 
-
-
     async def update_state(self):
         """Continually monitor and update the current daemon state."""
         # If there is no state to monitor continuously, delete this function
