@@ -7,7 +7,7 @@ from yaqd_core import Base
 
 
 class Octave(Base):
-    _kind = "octave"
+    _kind = "gage-octave"
 
     def __init__(self, name, config, config_filepath):
         super().__init__(name, config, config_filepath)

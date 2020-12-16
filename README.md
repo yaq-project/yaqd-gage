@@ -11,4 +11,4 @@ yaq daemons for GaGe hardware
 
 This package contains the following daemon(s):
 
-- https://yaq.fyi/daemons/octave
+- https://yaq.fyi/daemons/gage-octave

@@ -1,4 +1,4 @@
-protocol = "octave"
+protocol = "gage-octave"
 doc = ""
 traits = ["is-daemon"]
 
@@ -14,4 +14,3 @@ PyPI = "https://pypi.org/project/yaqd-gage"
 [state]
 
 [messages]
-

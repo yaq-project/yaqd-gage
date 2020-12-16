@@ -30,8 +30,8 @@ mypy:
 entry:
   stage: test
   script:
-    - yaqd-octave --version
-    - yaqd-octave -h
+    - yaqd-gage-octave --version
+    - yaqd-gage-octave -h
 traits:
   stage: test
   script:

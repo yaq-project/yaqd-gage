@@ -30,7 +30,7 @@ Issues = "https://gitlab.com/yaq/yaqd-gage/issues"
 dev = ["black", "pre-commit"]
 
 [tool.flit.scripts]
-yaqd-octave = "yaqd_gage._octave:Octave.main"
+yaqd-gage-octave = "yaqd_gage._octave:Octave.main"
 
 
 [tool.black]
