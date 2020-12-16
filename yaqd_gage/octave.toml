@@ -1,0 +1,17 @@
+protocol = "octave"
+doc = ""
+traits = ["is-daemon"]
+
+[links]
+source = "https://gitlab.com/yaq/yaqd-gage"
+bugtracker = "https://gitlab.com/yaq/yaqd-gage/-/issues"
+
+[installation]
+PyPI = "https://pypi.org/project/yaqd-gage"
+
+[config]
+
+[state]
+
+[messages]
+
