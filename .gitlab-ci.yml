@@ -30,8 +30,8 @@ mypy:
 entry:
   stage: test
   script:
-    - yaqd-gage-octave --version
-    - yaqd-gage-octave -h
+    - yaqd-gage-compuscope --version
+    - yaqd-gage-compuscope -h
 traits:
   stage: test
   script:
