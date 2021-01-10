@@ -1,0 +1,121 @@
+protocol = "gage-compuscope"
+doc = """
+yaq daemon supporting GaGe CompuScope Digitizer Models.
+This daemon essentially exposes GaGe's CompuScope configuration options directly.
+This daemon aims to support any configuration possible in GaGe's C/C# SDK.
+"""
+traits = ["is-daemon", "is-sensor", "has-measure-trigger"]
+
+[links]
+source = "https://gitlab.com/yaq/yaqd-gage"
+bugtracker = "https://gitlab.com/yaq/yaqd-gage/-/issues"
+
+[installation]
+PyPI = "https://pypi.org/project/yaqd-gage"
+
+[[types]]
+type = "enum"
+name = "coupling_mode"
+symbols = ["AC", "DC"]
+default = "DC"
+
+[[types]]
+type = "enum"
+name = "impedance_mode"
+symbols = ["50", "1000000"]
+default = "1000000"
+
+[[types]]
+type = "record"
+name = "channel"
+fields = [{"name"="range", "type"="int", "doc"="Full input range in millivolts."},
+          {"name"="coupling", "type"="coupling_mode"},
+	  {"name"="impedance", "type"="impedance_mode"},
+	  {"name"="diff_input", "type"="boolean", "default"=false, "doc"="Enable differential input coupling. Not all CompuScope models support differential input coupling."},
+	  {"name"="direct_adc", "type"="boolean", "default"=false, "doc"="Enable direct-to-ADC input coupling. Not all CompuScope models support direct-to-ADC input coupling."},
+	  {"name"="filter", "type"="boolean", "default"=false, "doc"="Enable low-pass filtering. Not all CopuScope models support low-pass filtering."},
+	  {"name"="dc_offset", "type"="int", "default"=0, "doc"="DC offset for this channel in millivolts. Can be negative or positive."}]
+
+[[types]]
+type = "record"
+name = "trigger"
+fields = [{"name"="range", "type"="int", "doc"="Full input range in millivolts."},
+          {"name"="condition", "type"="int", "doc"="Trigger condition. Refer to the CompuScope documentation for valid values."},
+          {"name"="level", "type"="float", "default"=0.0, "doc"="Trigger level as a perentage of the input range of the trigger source (half the full scale input range). For example, in the 2000 mV range at 0 DC offset, 50 would be positive 50% of 1 Volt, or 500 millivolts."},
+	  {"name"="source", "type"="int", "doc"="Trigger source. Refer to the CompuScope documentation for valid values."},
+	  {"name"="coupling", "type"="coupling_mode"},
+	  {"name"="impedance", "type"="impedance_mode"}]
+
+[config]
+
+[config.mode]
+doc = "Sets the operating mode of the CompuScope system. Refer to the CompuScope documentation for valid values."
+type = "int"
+
+[config.sample_rate]
+doc = "Sampling rate in Hertz. If not provided, model-dependent default is used."
+type = ["null", "int"]
+default = "__null__"
+
+[config.depth]
+doc = "Post-trigger depth, in samples."
+type = "int"
+default = 4096
+
+[config.segment_size]
+doc = "Size of the segment to capture. A segment is the sum of the pre- and post-trigger samples that are to be acquired."
+type = "int"
+default = 8192
+
+[config.trigger_delay]
+doc = "Number of samples to acquire between the occurance of the trigger event and the actual logging of the trigger event. By using this you can more easily capture signals far away from the trigger. Not all CompuScope models support TriggerDelay."
+type = "int"
+default = 0
+
+[config.segment_count]
+doc = "Number of segments to acquire. Segments are basically shots."
+type = "int"
+default = 1
+
+[config.trigger_time_out]
+doc = "Trigger timeout of the CompuScope system. The value is in 100 nanosecond units of time (e.g. a value of 10,000,000 gives a trigger timeout of 1 second). A value of -1 will cause the driver to wait indefinitely for a trigger."
+type = "int"
+default = -1
+
+[config.trigger_hold_off]
+doc = "Number of samples during which trigger events will be ignored after the system begins caputuring. This is useful for ensuring the accumulation of a specified amount of pre-trigger data."
+type = "int"
+default = 0
+
+[config.ext_clk]
+doc = "Enable or disable external clocking functionality. If external clocking is activated, the sample rate must be set to the external clocking frequency. Not all CompuScope hardware supports external clocking."
+type = "boolean"
+default = false
+
+[config.time_stamp_mode]
+doc = "The time-stamping counter may be reset upon the start of each acquisition or left free-running."
+type = "enum"
+name = "time_stampmode"
+symbols = ["Free", "Reset"]
+default = "Free"
+
+[config.time_stamp_clock]
+doc = "The time-stamping clock may operate in one of two modes. In fixed mode, the on-board oscillator will be used as the counter source. In sample mode, a frequency derived from the sampling clock will be used as the counter source."
+type = "enum"
+name = "time_stamp_clock_mode"
+symbols = ["Fixed", "Sample"]
+default = "Fixed"
+
+[config.channels]
+type = "array"
+items = "channel"
+default = []
+
+[config.triggers]
+type = "array"
+items = "trigger"
+default = []
+
+[state]
+
+[messages]

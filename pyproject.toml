@@ -10,7 +10,8 @@ author-email = "blaise@untzag.com"
 home-page = "https://yaq.fyi"
 description-file = "README.md"
 requires-python = ">=3.7"
-requires = ["yaqd-core>=2020.06.3"]
+requires = ["yaqd-core>=2020.06.3",
+            "numpy"]
 classifiers = [
     "Development Status :: 2 - Pre-Alpha",
     "Intended Audience :: Science/Research",
@@ -30,7 +31,7 @@ Issues = "https://gitlab.com/yaq/yaqd-gage/issues"
 dev = ["black", "pre-commit"]
 
 [tool.flit.scripts]
-yaqd-gage-octave = "yaqd_gage._octave:Octave.main"
+yaqd-gage-compuscope = "yaqd_gage._compuscope:CompuScope.main"
 
 
 [tool.black]
