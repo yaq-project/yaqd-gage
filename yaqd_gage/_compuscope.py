@@ -42,7 +42,7 @@ class CompuScope(HasMeasureTrigger, IsSensor, IsDaemon):
             config["DirectADC"] = int(channel["direct_adc"])
             config["Filter"] = int(channel["filter"])
             config["DcOffset"] = channel["dc_offset"]
-            #self._pg.set_channel_config(channel_index + 1, config)
+            # self._pg.set_channel_config(channel_index + 1, config)
         # trigger config
         for trigger_index, trigger in enumerate(self._config["triggers"]):
             config = {}

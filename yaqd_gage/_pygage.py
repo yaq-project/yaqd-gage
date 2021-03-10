@@ -77,10 +77,11 @@ class PyGage(object):
 
     @compuscope_error_handling
     def transfer_data(self, channel_index, start_position, transfer_length):
-        return self.interface.TransferData(self.handle, 
-                                           channel_index,
-                                           0,  # ?
-                                           1,  # ?
-                                           start_position, 
-                                           transfer_length,
-                                           )
+        return self.interface.TransferData(
+            self.handle,
+            channel_index,
+            0,  # ?
+            1,  # ?
+            start_position,
+            transfer_length,
+        )
