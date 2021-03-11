@@ -10,9 +10,40 @@
             "doc": "Post-trigger depth, in samples.",
             "type": "int"
         },
+        "enable": {
+            "default": true,
+            "doc": "Disable this daemon. The kind entry-point will not attempt to start this daemon.",
+            "origin": "is-daemon",
+            "type": "boolean"
+        },
         "ext_clk": {
             "default": false,
             "doc": "Enable or disable external clocking functionality. If external clocking is activated, the sample rate must be set to the external clocking frequency. Not all CompuScope hardware supports external clocking.",
+            "type": "boolean"
+        },
+        "log_level": {
+            "default": "info",
+            "doc": "Set daemon log-level.",
+            "origin": "is-daemon",
+            "type": {
+                "name": "level",
+                "symbols": [
+                    "debug",
+                    "info",
+                    "notice",
+                    "warning",
+                    "error",
+                    "critical",
+                    "alert",
+                    "emergency"
+                ],
+                "type": "enum"
+            }
+        },
+        "log_to_file": {
+            "default": false,
+            "doc": "Optionally force logging to a file.",
+            "origin": "is-daemon",
             "type": "boolean"
         },
         "loop_at_startup": {
@@ -239,9 +270,9 @@
     "requires": [],
     "state": {},
     "traits": [
-        "is-sensor",
         "has-measure-trigger",
-        "is-daemon"
+        "is-daemon",
+        "is-sensor"
     ],
     "types": [
         {
@@ -322,6 +353,11 @@
                     "doc": "Trigger level as a perentage of the input range of the trigger source (half the full scale input range). For example, in the 2000 mV range at 0 DC offset, 50 would be positive 50% of 1 Volt, or 500 millivolts.",
                     "name": "level",
                     "type": "float"
+                },
+                {
+                    "doc": "Trigger source. Refer to the CompuScope documentation for valid values.",
+                    "name": "source",
+                    "type": "int"
                 },
                 {
                     "name": "coupling",

@@ -3,11 +3,10 @@
 from typing import Any, Dict
 
 
-from ._constants import  error_codes
+from ._constants import error_codes
 
 
 class CompuScopeException(Exception):
-
     def __init__(self, error_code):
         if error_code in error_codes:
             message = f"{error_code}: {error_codes[error_code]}"
