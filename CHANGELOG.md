@@ -5,6 +5,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+### Added
+- document support for cse8442 digitizer
+
 ## [2021.3.0]
 
 ### Changed
