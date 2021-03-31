@@ -32,6 +32,7 @@ dev = ["black", "pre-commit"]
 
 [tool.flit.scripts]
 yaqd-gage-compuscope = "yaqd_gage._compuscope:CompuScope.main"
+yaqd-gage-compuscope-gui = "yaqd_gage._plot:main"
 
 
 [tool.black]

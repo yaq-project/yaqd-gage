@@ -5,6 +5,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+### Changed
+- major refactor utilizing onboard-averaging firmware
+
+### Added
+- new entry-point `yaqd-gage-compuscope-gui <channel_index>`
+
 ## [2021.1.0]
 
 ### Added
