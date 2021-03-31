@@ -1,6 +1,15 @@
 """GaGe defined constants."""
 
 
+# compuscope status codes (returned by CsGetStatus)
+acq_status_codes = dict()
+acq_status_codes[0] = "ACQ_STATUS_READY"
+acq_status_codes[1] = "ACQ_STATUS_WAIT_TRIGGER"
+acq_status_codes[2] = "ACQ_STATUS_TRIGGERED"
+acq_status_codes[3] = "ACQ_STATUS_BUSY_TX"
+acq_status_codes[4] = "ACQ_STATUS_BUSY_CALIB"
+
+
 # compuscope error codes
 error_codes = {}
 error_codes[6] = "CS_STRUCTURE_TRUNCATED"
@@ -183,10 +192,23 @@ error_codes[-850] = "CS_REMOTE_SOCKET_ERROR"
 error_codes[-32767] = "CS_MISC_ERROR"
 
 
-# compuscope status codes (returned by CsGetStatus)
-acq_status_codes = dict()
-acq_status_codes[0] = "ACQ_STATUS_READY"
-acq_status_codes[1] = "ACQ_STATUS_WAIT_TRIGGER"
-acq_status_codes[2] = "ACQ_STATUS_TRIGGERED"
-acq_status_codes[3] = "ACQ_STATUS_BUSY_TX"
-acq_status_codes[4] = "ACQ_STATUS_BUSY_CALIB"
+# transfer modes
+transfer_modes = dict()
+transfer_modes["slave"] = 0x80000000  # pci slave mode transfer used for troubleshooting
+transfer_modes["rawdata"] = 0x40000000  # transfer data in raw data format with timestamp
+transfer_modes["default"] = 0x00
+transfer_modes["data_analogonly"] = 0x00  # transfer only analog data.
+transfer_modes["data_float"] = 0x01  # transfer data in floating point format
+transfer_modes["timestamp"] = 0x02  # transfer time-stamp information
+transfer_modes["data_16"] = 0x04  # transfer all data bits including digital input bits
+transfer_modes["data_onlydigital"] = 0x08  # transfer only digital input bits
+transfer_modes["data_32"] = 0x10  # transfer data as 32 bit samples
+transfer_modes[
+    "data_fft"
+] = 0x30  # transfer data in fft format. should be used only with expert fft firmware
+transfer_modes["data_interleaved"] = 0x40  # transfer data in interleaved format
+transfer_modes["segment_tail"] = 0x80  # transfer segment tail in raw data format
+transfer_modes[
+    "histogram"
+] = 0x100  # transfer histogram data (cobra pci only). should be use only with expert histogram
+transfer_modes["data_64"] = 0x200  # transfer data as 64 bit samples

@@ -23,7 +23,7 @@ default = "DC"
 type = "enum"
 name = "impedance_mode"
 symbols = ["50", "1000000"]
-default = "1000000"
+default = "50"
 
 [[types]]
 type = "record"
@@ -34,7 +34,13 @@ fields = [{"name"="range", "type"="int", "doc"="Full input range in millivolts."
 	  {"name"="diff_input", "type"="boolean", "default"=false, "doc"="Enable differential input coupling. Not all CompuScope models support differential input coupling."},
 	  {"name"="direct_adc", "type"="boolean", "default"=false, "doc"="Enable direct-to-ADC input coupling. Not all CompuScope models support direct-to-ADC input coupling."},
 	  {"name"="filter", "type"="boolean", "default"=false, "doc"="Enable low-pass filtering. Not all CopuScope models support low-pass filtering."},
-	  {"name"="dc_offset", "type"="int", "default"=0, "doc"="DC offset for this channel in millivolts. Can be negative or positive."}]
+	  {"name"="dc_offset", "type"="int", "default"=0, "doc"="DC offset for this channel in millivolts. Can be negative or positive."},
+	  {"name"="signal_start_index", "type"="int", "default"=0, "doc"="Start index for signal region in post-processing. NumPy style indexing."},
+	  {"name"="signal_stop_index", "type"="int", "default"=-1, "doc"="Stop index for signal region in post-processing. Numpy style indexing."},
+	  {"name"="baseline_start_index", "type"=["null", "int"], "default"="__null__", "doc"="Start index for baseline region in post-processing. NumPy style indexing."},
+	  {"name"="baseline_stop_index", "type"=["null", "int"], "default"="__null__", "doc"="Stop index for baseline region in post-processing. Numpy style indexing."},
+	  {"name"="use_baseline", "type"="boolean", "default"=false, "doc"="Enable baseline subtraction for post-processing."},
+	  {"name"="invert", "type"="boolean", "default"=false, "doc"="If true, post-processed signal is inverted."}]
 
 [[types]]
 type = "record"
@@ -49,8 +55,9 @@ fields = [{"name"="range", "type"="int", "doc"="Full input range in millivolts."
 [config]
 
 [config.mode]
-doc = "Sets the operating mode of the CompuScope system. Refer to the CompuScope documentation for valid values."
+doc = "Sets the operating mode of the CompuScope system. Refer to the CompuScope documentation for valid values. Default is 1073741825 for FirmWare Averaging"
 type = "int"
+default = 0x40000004
 
 [config.sample_rate]
 doc = "Sampling rate in Hertz. If not provided, model-dependent default is used."
@@ -60,30 +67,30 @@ default = "__null__"
 [config.depth]
 doc = "Post-trigger depth, in samples."
 type = "int"
-default = 4096
+default = 240
+
+[config.record_count]
+doc = "Number of records to collect. Can be thought of as nshots in firmware averaging mode."
+type = "int"
+default = 1024
 
 [config.segment_size]
 doc = "Size of the segment to capture. A segment is the sum of the pre- and post-trigger samples that are to be acquired."
 type = "int"
-default = 8192
+default = 240
 
 [config.trigger_delay]
 doc = "Number of samples to acquire between the occurance of the trigger event and the actual logging of the trigger event. By using this you can more easily capture signals far away from the trigger. Not all CompuScope models support TriggerDelay."
 type = "int"
 default = 0
 
-[config.segment_count]
-doc = "Number of segments to acquire. Segments are basically shots."
-type = "int"
-default = 1
-
 [config.trigger_time_out]
 doc = "Trigger timeout of the CompuScope system. The value is in 100 nanosecond units of time (e.g. a value of 10,000,000 gives a trigger timeout of 1 second). A value of -1 will cause the driver to wait indefinitely for a trigger."
 type = "int"
-default = -1
+default = 1000000
 
 [config.trigger_hold_off]
-doc = "Number of samples during which trigger events will be ignored after the system begins caputuring. This is useful for ensuring the accumulation of a specified amount of pre-trigger data."
+doc = "Number of samples during which trigger events will be ignored after the system begins capturing. This is useful for ensuring the accumulation of a specified amount of pre-trigger data."
 type = "int"
 default = 0
 
@@ -118,4 +125,28 @@ default = []
 
 [state]
 
+[state.segment_count]
+doc = "Number of times to acquire nshots."
+type = "int"
+default = 1000
+
 [messages]
+
+[messages.get_measured_samples]
+doc = "Get a dictionary of 1D arrays of measured samples."
+response = {"type"="map", "values"="ndarray"}
+
+[messages.get_segment_count]
+doc = "Get the currently planned number of chunks."
+response = "int"
+
+[messages.set_segment_count]
+doc = "Set the chunk count."
+request = [{"name"="count", "type"="int"}]
+
+[fields]
+
+[fields.segment_count]
+getter = "get_nchunks"
+setter = "set_nchunks"
+type = "int"
