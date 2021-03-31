@@ -1,6 +1,6 @@
 import sys
 
-import numpy as np
+import numpy as np  # type: ignore
 import pyqtgraph as pg  # type: ignore
 from pyqtgraph.Qt import QtGui, QtCore, QtWidgets  # type: ignore
 import time
