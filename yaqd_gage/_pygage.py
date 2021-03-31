@@ -4,7 +4,7 @@
 import sys
 import time
 
-import numpy as np
+import numpy as np  # type: ignore
 
 from ._exceptions import CompuScopeException
 from ._constants import transfer_modes
