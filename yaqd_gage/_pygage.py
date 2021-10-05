@@ -79,56 +79,25 @@ class PyGage(object):
     @compuscope_error_handling
     def set_acquisition_config(
         self,
-        *,
-        segment_count=1,
-        depth=240,
-        sample_resolution=-2097152,
-        sample_size=2,
-        trigger_timeout=1_000_000,
-        sample_offset=-64,
-        mode=1073741825,
-        **kwargs,
+        config
     ):
-        config = self.get_acquisition_config()
-        config["SegmentCount"] = segment_count
-        config["Depth"] = depth
-        config["SegmentSize"] = kwargs.get("segment_size", depth)
-        config["SampleResolution"] = sample_resolution
-        config["SampleSize"] = sample_size
-        config["TriggerTimeout"] = trigger_timeout
-        config["SampleOffset"] = sample_offset
-        config["Mode"] = mode
         return self.interface.SetAcquisitionConfig(self.handle, config)
 
     @compuscope_error_handling
     def set_channel_config(
         self,
         channel_index,
-        *,
-        impedance=1_000_000,
-        input_range=10_000,
-        coupling=2,
-        dc_offset=0,
+        config
     ):
-        config = self.get_channel_config(channel_index)
-        config["Impedance"] = impedance
-        config["InputRange"] = input_range
-        config["Coupling"] = coupling
-        config["DcOffet"] = dc_offset
         return self.interface.SetChannelConfig(self.handle, channel_index, config)
 
     @compuscope_error_handling
     def set_trigger_config(
         self,
         trigger_index,
-        *,
-        source=-1,
-        level=10,
+        config
     ):
         # remember, unlike channels trigger indexes do not correspond to physical assigments
-        config = self.get_trigger_config(trigger_index)
-        config["Source"] = source
-        config["Level"] = level
         return self.interface.SetTriggerConfig(self.handle, trigger_index, config)
 
     @compuscope_error_handling
