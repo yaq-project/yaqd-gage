@@ -33,7 +33,7 @@ class CompuScope(HasMeasureTrigger, IsSensor, IsDaemon):
         config["TimeStampMode"] = self._config["time_stamp_mode"]
         config["TimeStampClock"] = self._config["time_stamp_clock"]
         self._pg.set_acquisition_config(config)
-        self._pg.set_multiple_record_number(self._config["record_count"])
+        self._pg.set_multiple_rec_average_count(self._config["record_count"])
         # channel config
         for channel_index, channel in enumerate(self._config["channels"]):
             config = {}
