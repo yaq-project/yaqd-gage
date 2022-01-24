@@ -5,6 +5,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+### Fixed
+- bug in yaqd-chopping that caused crashes when choppers are off
+- bug in yaqd-chopping that caused crashes when segment_count updated during acquisition
+
 ## [2022.1.0]
 
 ### Added
