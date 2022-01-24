@@ -11,6 +11,7 @@ yaq daemons for [GaGe](http://www.gage-applied.com/) hardware
 
 This package contains the following daemon(s):
 
+- https://yaq.fyi/daemons/gage-chopping
 - https://yaq.fyi/daemons/gage-compuscope
 
 ## driver installation
