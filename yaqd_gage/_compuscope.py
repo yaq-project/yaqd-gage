@@ -13,6 +13,12 @@ from ._constants import acq_status_codes, transfer_modes
 from ._pygage import PyGage
 
 
+impedences = {
+    "fifty": 50,
+    "onemeg": 1_000_000
+}
+
+
 class CompuScope(HasMeasureTrigger, IsSensor, IsDaemon):
     _kind = "gage-compuscope"
 
@@ -40,7 +46,7 @@ class CompuScope(HasMeasureTrigger, IsSensor, IsDaemon):
             config["InputRange"] = channel["range"]
             couplings = {"DC": 1, "AC": 2}
             config["Coupling"] = couplings[channel["coupling"]]
-            config["Impedance"] = int(channel["impedance"])
+            config["Impedance"] = impedences[channel["impedance"]]
             config["DiffInput"] = int(channel["diff_input"])
             config["DirectADC"] = int(channel["direct_adc"])
             config["Filter"] = int(channel["filter"])
@@ -53,7 +59,7 @@ class CompuScope(HasMeasureTrigger, IsSensor, IsDaemon):
             config["Level"] = trigger["level"]
             config["Source"] = trigger["source"]
             config["InputRange"] = trigger["range"]
-            config["Impedance"] = int(channel["impedance"])
+            config["Impedance"] = impedences[channel["impedance"]]
             config["Relation"] = 0
             self._pg.set_trigger_config(trigger_index + 1, config)
         # finish
