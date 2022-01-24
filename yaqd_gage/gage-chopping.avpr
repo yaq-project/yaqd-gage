@@ -78,11 +78,6 @@
             "origin": "is-daemon",
             "type": "int"
         },
-        "record_count": {
-            "default": 1024,
-            "doc": "Number of records to collect. Can be thought of as nshots in firmware averaging mode.",
-            "type": "int"
-        },
         "sample_rate": {
             "default": null,
             "doc": "Sampling rate in Hertz. If not provided, model-dependent default is used.",
@@ -90,6 +85,11 @@
                 "null",
                 "int"
             ]
+        },
+        "segment_bins": {
+            "default": {},
+            "type": "map",
+            "values": "voltage_range"
         },
         "segment_size": {
             "default": 240,
@@ -146,14 +146,7 @@
             "type": "array"
         }
     },
-    "doc": "yaq daemon supporting GaGe CompuScope Digitizer Models.\nThis daemon essentially exposes GaGe's CompuScope configuration options directly.\nThis daemon aims to support any configuration possible in GaGe's C/C# SDK.\n",
-    "fields": {
-        "segment_count": {
-            "getter": "get_nchunks",
-            "setter": "set_nchunks",
-            "type": "int"
-        }
-    },
+    "doc": "yaq daemon supporting GaGe CompuScope Digitizer Models.\nFor chopping.\n",
     "hardware": [
         "gage:cse8442"
     ],
@@ -216,6 +209,11 @@
             "request": [],
             "response": "string"
         },
+        "get_edge_width_count": {
+            "doc": "Get edge width count.",
+            "request": [],
+            "response": "int"
+        },
         "get_measured": {
             "doc": "Returns map of channel_name to measured_value. Always returns additional key measurement_id.",
             "origin": "is-sensor",
@@ -237,6 +235,28 @@
                 "values": "ndarray"
             }
         },
+        "get_measured_segment_regions": {
+            "doc": "Get current segment regions.",
+            "request": [],
+            "response": {
+                "type": "map",
+                "values": {
+                    "items": {
+                        "items": "int",
+                        "type": "array"
+                    },
+                    "type": "array"
+                }
+            }
+        },
+        "get_measured_segments": {
+            "doc": "Get a dictionary of 1D arrays of measured segments.",
+            "request": [],
+            "response": {
+                "type": "map",
+                "values": "ndarray"
+            }
+        },
         "get_measurement_id": {
             "doc": "Get current measurement_id. Clients are encouraged to watch for this to be updated before calling get_measured to get entire measurement.",
             "origin": "is-sensor",
@@ -244,6 +264,11 @@
             "response": {
                 "type": "int"
             }
+        },
+        "get_record_count": {
+            "doc": "Get record count.",
+            "request": [],
+            "response": "int"
         },
         "get_segment_count": {
             "doc": "Get the currently planned number of chunks.",
@@ -280,6 +305,26 @@
             ],
             "response": "int"
         },
+        "set_edge_width_count": {
+            "doc": "Set edge width count.",
+            "request": [
+                {
+                    "name": "count",
+                    "type": "int"
+                }
+            ],
+            "response": "null"
+        },
+        "set_record_count": {
+            "doc": "Set record count.",
+            "request": [
+                {
+                    "name": "count",
+                    "type": "int"
+                }
+            ],
+            "response": "null"
+        },
         "set_segment_count": {
             "doc": "Set the chunk count.",
             "request": [
@@ -309,12 +354,57 @@
             "response": "null"
         }
     },
-    "protocol": "gage-compuscope",
+    "properties": {
+        "edge_width_count": {
+            "control_kind": "normal",
+            "dynamic": true,
+            "getter": "get_edge_width_count",
+            "limits_getter": null,
+            "options_getter": null,
+            "record_kind": "metadata",
+            "setter": "set_edge_width_count",
+            "type": "int",
+            "units_getter": null
+        },
+        "record_count": {
+            "control_kind": "normal",
+            "dynamic": true,
+            "getter": "get_record_count",
+            "limits_getter": null,
+            "options_getter": null,
+            "record_kind": "metadata",
+            "setter": "set_record_count",
+            "type": "int",
+            "units_getter": null
+        },
+        "segment_count": {
+            "control_kind": "normal",
+            "dynamic": true,
+            "getter": "get_segment_count",
+            "limits_getter": null,
+            "options_getter": null,
+            "record_kind": "metadata",
+            "setter": "set_segment_count",
+            "type": "int",
+            "units_getter": null
+        }
+    },
+    "protocol": "gage-chopping",
     "requires": [],
     "state": {
+        "edge_width_count": {
+            "default": 1,
+            "doc": "Width of edges in segment count.",
+            "type": "int"
+        },
+        "record_count": {
+            "default": 32,
+            "doc": "Number of shots to collect and firmware-average.",
+            "type": "int"
+        },
         "segment_count": {
             "default": 1000,
-            "doc": "Number of times to acquire nshots.",
+            "doc": "Number of times to acquire record_count.",
             "type": "int"
         }
     },
@@ -460,6 +550,20 @@
                 }
             ],
             "name": "trigger",
+            "type": "record"
+        },
+        {
+            "fields": [
+                {
+                    "name": "min",
+                    "type": "double"
+                },
+                {
+                    "name": "max",
+                    "type": "double"
+                }
+            ],
+            "name": "voltage_range",
             "type": "record"
         },
         {

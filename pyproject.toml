@@ -13,6 +13,9 @@ requires-python = ">=3.7"
 requires = ["yaqd-core>=2020.06.3",
             "numpy",
             "toml>=0.10.2",
+            "yaq-traits",
+            "qtypes",
+            "toml",
             ]
 classifiers = [
     "Development Status :: 2 - Pre-Alpha",
@@ -34,8 +37,14 @@ dev = ["black", "pre-commit"]
 
 [tool.flit.scripts]
 yaqd-gage-compuscope = "yaqd_gage._compuscope:CompuScope.main"
-yaqd-gage-compuscope-gui = "yaqd_gage._plot:main"
+yaqd-gage-chopping = "yaqd_gage._chopping:CompuScope.main"
 
+[tool.flit.entrypoints."yaqc_qtpy.main.gage_chopping"]
+gage-samples = "yaqd_gage.gui._samples_gui:SamplesGUI"
+gage-segments = "yaqd_gage.gui._segments_gui:SegmentsGUI"
+
+[tool.flit.entrypoints."yaqc_qtpy.main.gage_compuscope"]
+gage-samples = "yaqd_gage.gui._samples_gui:SamplesGUI"
 
 [tool.black]
 line-length = 99

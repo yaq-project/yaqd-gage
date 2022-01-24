@@ -1,8 +1,7 @@
-protocol = "gage-compuscope"
+protocol = "gage-chopping"
 doc = """
 yaq daemon supporting GaGe CompuScope Digitizer Models.
-This daemon essentially exposes GaGe's CompuScope configuration options directly.
-This daemon aims to support any configuration possible in GaGe's C/C# SDK.
+For chopping.
 """
 traits = ["is-daemon", "is-sensor", "has-measure-trigger"]
 hardware = ["gage:cse8442"]
@@ -53,6 +52,12 @@ fields = [{"name"="range", "type"="int", "doc"="Full input range in millivolts."
 	  {"name"="coupling", "type"="coupling_mode"},
 	  {"name"="impedance", "type"="impedance_mode"}]
 
+[[types]]
+type = "record"
+name = "voltage_range"
+fields = [{"name"="min", "type"="double"},
+          {"name"="max", "type"="double"}]
+
 [config]
 
 [config.mode]
@@ -69,11 +74,6 @@ default = "__null__"
 doc = "Post-trigger depth, in samples."
 type = "int"
 default = 240
-
-[config.record_count]
-doc = "Number of records to collect. Can be thought of as nshots in firmware averaging mode."
-type = "int"
-default = 1024
 
 [config.segment_size]
 doc = "Size of the segment to capture. A segment is the sum of the pre- and post-trigger samples that are to be acquired."
@@ -124,30 +124,82 @@ type = "array"
 items = "trigger"
 default = []
 
+[config.segment_bins]
+type = "map"
+values = "voltage_range"
+default = {}
+
 [state]
 
+[state.record_count]
+doc = "Number of shots to collect and firmware-average."
+type = "int"
+default = 32
+
 [state.segment_count]
-doc = "Number of times to acquire nshots."
+doc = "Number of times to acquire record_count."
 type = "int"
 default = 1000
 
+[state.edge_width_count]
+doc = "Width of edges in segment count."
+type = "int"
+default = 1
+
 [messages]
+
+[messages.get_edge_width_count]
+doc = "Get edge width count."
+response = "int"
 
 [messages.get_measured_samples]
 doc = "Get a dictionary of 1D arrays of measured samples."
 response = {"type"="map", "values"="ndarray"}
 
+[messages.get_measured_segments]
+doc = "Get a dictionary of 1D arrays of measured segments."
+response = {"type"="map", "values"="ndarray"}
+
+[messages.get_record_count]
+doc = "Get record count."
+response = "int"
+
 [messages.get_segment_count]
 doc = "Get the currently planned number of chunks."
 response = "int"
+
+[messages.set_edge_width_count]
+doc = "Set edge width count. Setting of zero turns off edge detection."
+request = [{"name"="count", "type"="int"}]
 
 [messages.set_segment_count]
 doc = "Set the chunk count."
 request = [{"name"="count", "type"="int"}]
 
-[fields]
+[messages.set_record_count]
+doc = "Set record count."
+request = [{"name"="count", "type"="int"}]
 
-[fields.segment_count]
-getter = "get_nchunks"
-setter = "set_nchunks"
+[properties]
+
+[properties.edge_width_count]
+getter = "get_edge_width_count"
+setter = "set_edge_width_count"
 type = "int"
+control_kind = "normal"
+record_kind = "metadata"
+
+[properties.record_count]
+getter = "get_record_count"
+setter = "set_record_count"
+type = "int"
+control_kind = "normal"
+record_kind = "metadata"
+
+[properties.segment_count]
+getter = "get_segment_count"
+setter = "set_segment_count"
+type = "int"
+control_kind = "normal"
+record_kind = "metadata"
+
