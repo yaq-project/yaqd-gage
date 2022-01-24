@@ -157,7 +157,7 @@ class CompuScope(HasMeasureTrigger, IsSensor, IsDaemon):
         out["ai0_diff_ad"] = out["ai0_d"] - out["ai0_a"]
         return out
 
-    def _process_single_channel(self, channel_index: int, segment_count: int, record_count: int) -> Dict[str, float]:
+    def _process_single_channel(self, channel_index: int, segment_count: int, record_count: int) -> Dict[str, Any]:
         out = dict()
         out[f"ai{channel_index}"] = np.zeros(segment_count, dtype=float)
         for segment_index in range(self._state["segment_count"]):

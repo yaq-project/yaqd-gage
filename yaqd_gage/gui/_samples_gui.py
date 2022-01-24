@@ -2,7 +2,7 @@ from functools import partial
 
 import toml
 import numpy as np
-import pyqtgraph
+import pyqtgraph  # type: ignore
 from qtpy import QtWidgets, QtCore  # type: ignore
 import qtypes  # type: ignore
 

@@ -1,10 +1,10 @@
 from functools import partial
 from re import L
-from async_timeout import enum
+from async_timeout import enum  # type: ignore
 
 import toml
 import numpy as np
-import pyqtgraph
+import pyqtgraph  # type: ignore
 from qtpy import QtWidgets, QtCore  # type: ignore
 import qtypes  # type: ignore
 
