@@ -7,6 +7,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ### Added
 - document support for cse8442 digitizer
+- new daemon: yaqd-gage-chopping
+- new graphical entry points for yaqc-qtpy
+- new properties
 
 ### Changed
 - toml dependency now explicitly specified
