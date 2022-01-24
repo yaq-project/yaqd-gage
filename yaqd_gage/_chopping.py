@@ -125,7 +125,7 @@ class CompuScope(HasMeasureTrigger, IsSensor, IsDaemon):
         if self._state["edge_width_count"]:
             gradient = np.gradient(segments["ai3"])
             edges = np.abs(gradient) > 0.1
-            edges = np.convolve(edges, np.full(self._state["edge_width_count"], True))
+            edges = np.convolve(edges, np.full(self._state["edge_width_count"], True), mode="same")
         else:
             edges = np.full(segment_count, False)
         # get regions
@@ -148,10 +148,22 @@ class CompuScope(HasMeasureTrigger, IsSensor, IsDaemon):
         out["ai1"] = np.mean(segments["ai1"])
         out["ai2"] = np.mean(segments["ai2"])
         out["ai3"] = np.mean(segments["ai3"])
-        out["ai0_a"] = np.mean(segments["ai0"][np.r_[tuple(regions["a"])]])
-        out["ai0_b"] = np.mean(segments["ai0"][np.r_[tuple(regions["b"])]])
-        out["ai0_c"] = np.mean(segments["ai0"][np.r_[tuple(regions["c"])]])
-        out["ai0_d"] = np.mean(segments["ai0"][np.r_[tuple(regions["d"])]])
+        if regions["a"]:
+            out["ai0_a"] = np.mean(segments["ai0"][np.r_[tuple(regions["a"])]])
+        else:
+            out["ai0_a"] = np.nan
+        if regions["b"]:
+            out["ai0_b"] = np.mean(segments["ai0"][np.r_[tuple(regions["b"])]])
+        else:
+            out["ai0_b"] = np.nan
+        if regions["c"]:
+            out["ai0_c"] = np.mean(segments["ai0"][np.r_[tuple(regions["c"])]])
+        else:
+            out["ai0_c"] = np.nan
+        if regions["d"]:
+            out["ai0_d"] = np.mean(segments["ai0"][np.r_[tuple(regions["d"])]])
+        else:
+            out["ai0_d"] = np.nan
         out["ai0_diff_abcd"] = out["ai0_a"] - out["ai0_b"] + out["ai0_c"] - out["ai0_d"]
         out["ai0_diff_ab"] = out["ai0_b"] - out["ai0_a"]
         out["ai0_diff_ad"] = out["ai0_d"] - out["ai0_a"]
@@ -160,7 +172,7 @@ class CompuScope(HasMeasureTrigger, IsSensor, IsDaemon):
     def _process_single_channel(self, channel_index: int, segment_count: int, record_count: int) -> Dict[str, Any]:
         out = dict()
         out[f"ai{channel_index}"] = np.zeros(segment_count, dtype=float)
-        for segment_index in range(self._state["segment_count"]):
+        for segment_index in range(segment_count):
 
             # samples
             seg = self._pg.transfer_data(
