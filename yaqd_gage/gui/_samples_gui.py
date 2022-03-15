@@ -20,14 +20,18 @@ class SamplesGUI(QtWidgets.QSplitter):
         self._timer = QtCore.QTimer()
         self._timer.timeout.connect(self.poll)
         self._create_main_frame()
-        self.poll()    # once to get some data plotted
+        self.poll()  # once to get some data plotted
 
     def _create_main_frame(self):
         self.plot_widget = yaqc_qtpy._plot.Plot1D(yAutoRange=True)
         self.scatter = self.plot_widget.add_scatter()
-        self.signal_region = pyqtgraph.LinearRegionItem(brush="#b5bd6844", movable=False, pen="#00000000")
+        self.signal_region = pyqtgraph.LinearRegionItem(
+            brush="#b5bd6844", movable=False, pen="#00000000"
+        )
         self.plot_widget.plot_object.addItem(self.signal_region)
-        self.baseline_region = pyqtgraph.LinearRegionItem(brush="#cc666644", movable=False, pen="#00000000")
+        self.baseline_region = pyqtgraph.LinearRegionItem(
+            brush="#cc666644", movable=False, pen="#00000000"
+        )
         self.plot_widget.plot_object.addItem(self.baseline_region)
         self.signal_mean = self.plot_widget.add_infinite_line(color="#b5bd68", hide=False, angle=0)
         self.baseline_mean = self.plot_widget.add_infinite_line(color="#cc6666", angle=0)
@@ -44,11 +48,15 @@ class SamplesGUI(QtWidgets.QSplitter):
         self._poll_periodically_bool = qtypes.Bool("poll periodically")
         self._poll_periodically_bool.updated.connect(self._on_poll_periodically_updated)
         plot_item.append(self._poll_periodically_bool)
-        self._poll_period = qtypes.Float("poll period (s)", value={"value": 1, "minimum": 0, "maximum": 1000})
+        self._poll_period = qtypes.Float(
+            "poll period (s)", value={"value": 1, "minimum": 0, "maximum": 1000}
+        )
         self._poll_period.updated.connect(self._on_poll_periodically_updated)
         self.qclient.get_measured_samples.finished.connect(self._on_get_samples)
         plot_item.append(self._poll_period)
-        self._channel_selector = qtypes.Enum("channel", value={"allowed": [f"ai{i}" for i in range(4)]})
+        self._channel_selector = qtypes.Enum(
+            "channel", value={"allowed": [f"ai{i}" for i in range(4)]}
+        )
         self._channel_selector.updated.connect(lambda x: self.poll())
         plot_item.append(self._channel_selector)
         plot_item.setExpanded(True)
@@ -70,17 +78,45 @@ class SamplesGUI(QtWidgets.QSplitter):
             header = qtypes.Null(f"ai{i}")
             self.config_item.append(header)
             header.append(qtypes.Integer("range (mV)", disabled=True, value={"value": d["range"]}))
-            header.append(qtypes.Enum("coupling", disabled=True, value={"value": d["coupling"], "allowed": ["AC", "DC"]}))
-            header.append(qtypes.Float("dc offset (V)", disabled=True, value={"value": d["dc_offset"]}))
-            header.append(qtypes.Integer("signal start index", disabled=True, value={"value": d["signal_start_index"]}))
-            header.append(qtypes.Integer("signal stop index", disabled=True, value={"value": d["signal_stop_index"]}))
-            header.append(qtypes.Bool("use baseline", disabled=True, value={"value": d["use_baseline"]}))
-            header.append(qtypes.Integer("baseline start index", disabled=True, value={"value": d["baseline_start_index"]}))
-            header.append(qtypes.Integer("baseline stop index", disabled=True, value={"value": d["baseline_stop_index"]}))
+            header.append(
+                qtypes.Enum(
+                    "coupling",
+                    disabled=True,
+                    value={"value": d["coupling"], "allowed": ["AC", "DC"]},
+                )
+            )
+            header.append(
+                qtypes.Float("dc offset (V)", disabled=True, value={"value": d["dc_offset"]})
+            )
+            header.append(
+                qtypes.Integer(
+                    "signal start index", disabled=True, value={"value": d["signal_start_index"]}
+                )
+            )
+            header.append(
+                qtypes.Integer(
+                    "signal stop index", disabled=True, value={"value": d["signal_stop_index"]}
+                )
+            )
+            header.append(
+                qtypes.Bool("use baseline", disabled=True, value={"value": d["use_baseline"]})
+            )
+            header.append(
+                qtypes.Integer(
+                    "baseline start index",
+                    disabled=True,
+                    value={"value": d["baseline_start_index"]},
+                )
+            )
+            header.append(
+                qtypes.Integer(
+                    "baseline stop index", disabled=True, value={"value": d["baseline_stop_index"]}
+                )
+            )
             header.append(qtypes.Bool("invert", disabled=True, value={"value": d["invert"]}))
 
             header.setExpanded(True)
-    
+
         self.config_item.setExpanded(True)
         self._tree_widget.resizeColumnToContents(0)
 

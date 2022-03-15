@@ -14,11 +14,7 @@ from yaqc_qtpy import _plot, qtype_items  # noqa
 import yaq_traits  # type: ignore
 
 
-colors = ["#cc6666",  # red
-          "#f0c674",  # yellow
-          "#8abeb7",  # aqua
-          "#b294bb"  # purple
-          ]
+colors = ["#cc6666", "#f0c674", "#8abeb7", "#b294bb"]  # red  # yellow  # aqua  # purple
 
 
 class SegmentsGUI(QtWidgets.QSplitter):
@@ -30,14 +26,16 @@ class SegmentsGUI(QtWidgets.QSplitter):
         self._timer.timeout.connect(self.poll)
         self._create_main_frame()
         self.qclient.get_measured_segments.finished.connect(self._on_get_segments)
-        self.poll()    # once to get some data plotted
+        self.poll()  # once to get some data plotted
 
     def _create_main_frame(self):
         self.plot_widget = yaqc_qtpy._plot.Plot1D(yAutoRange=True)
         self.scatter = self.plot_widget.add_scatter()
         self.indicator_regions = []
         for _ in range(99):
-            item = pyqtgraph.LinearRegionItem(movable=False, pen="#00000000", orientation="vertical")
+            item = pyqtgraph.LinearRegionItem(
+                movable=False, pen="#00000000", orientation="vertical"
+            )
             self.indicator_regions.append(item)
             self.plot_widget.plot_object.addItem(item)
         self.addWidget(self.plot_widget)
@@ -53,12 +51,20 @@ class SegmentsGUI(QtWidgets.QSplitter):
         self._poll_periodically_bool = qtypes.Bool("poll periodically")
         self._poll_periodically_bool.updated.connect(self._on_poll_periodically_updated)
         plot_item.append(self._poll_periodically_bool)
-        self._poll_period = qtypes.Float("poll period (s)", value={"value": 1, "minimum": 0, "maximum": 1000})
+        self._poll_period = qtypes.Float(
+            "poll period (s)", value={"value": 1, "minimum": 0, "maximum": 1000}
+        )
         self._poll_period.updated.connect(self._on_poll_periodically_updated)
         plot_item.append(self._poll_period)
-        self._channel_selector = qtypes.Enum("channel", value={"allowed": [f"ai{i}" for i in range(4)]})
+        self._channel_selector = qtypes.Enum(
+            "channel", value={"allowed": [f"ai{i}" for i in range(4)]}
+        )
         self._channel_selector.updated.connect(lambda x: self.poll())
         plot_item.append(self._channel_selector)
+        self._max_segments_shown = qtypes.Integer(
+            "max segments shown", value={"value": 1_000, "minimum": 10, "maximum": 1_000}
+        )
+        plot_item.append(self._max_segments_shown)
         plot_item.setExpanded(True)
 
         # config
@@ -86,8 +92,16 @@ class SegmentsGUI(QtWidgets.QSplitter):
         for k, v in config["segment_bins"].items():
             header = qtypes.Null(k)
             bins_item.append(header)
-            header.append(qtypes.Float("min", disabled=True, value={"value": config["segment_bins"][k]["min"]}))
-            header.append(qtypes.Float("max", disabled=True, value={"value": config["segment_bins"][k]["max"]}))
+            header.append(
+                qtypes.Float(
+                    "min", disabled=True, value={"value": config["segment_bins"][k]["min"]}
+                )
+            )
+            header.append(
+                qtypes.Float(
+                    "max", disabled=True, value={"value": config["segment_bins"][k]["max"]}
+                )
+            )
             header.setExpanded(True)
 
         self.config_item.setExpanded(True)
@@ -99,14 +113,25 @@ class SegmentsGUI(QtWidgets.QSplitter):
         self.bin_regions = dict()
         self.segment_means = dict()
         for k, v in self._config["segment_bins"].items():
-            self.colors[k] = colors[ci]; ci += 1  # incriment color index
-            self.bin_regions[k] = pyqtgraph.LinearRegionItem(brush=self.colors[k] + "44", movable=False, pen="#00000000", orientation="horizontal")
+            self.colors[k] = colors[ci]
+            ci += 1  # incriment color index
+            self.bin_regions[k] = pyqtgraph.LinearRegionItem(
+                brush=self.colors[k] + "44",
+                movable=False,
+                pen="#00000000",
+                orientation="horizontal",
+            )
             self.bin_regions[k].setRegion((v["min"], v["max"]))
             self.plot_widget.plot_object.addItem(self.bin_regions[k])
 
     def _on_get_segments(self, segments):
         channel_name = self._channel_selector.get_value()
         channel_index = int(channel_name[-1])
+
+        # slice if needed
+        if segments["ai3"].size > self._max_segments_shown.get_value():
+            for k, v in segments.items():
+                segments[k] = v[: self._max_segments_shown.get_value() + 1]
 
         # get edges
         gradient = np.gradient(segments["ai3"])
@@ -133,7 +158,8 @@ class SegmentsGUI(QtWidgets.QSplitter):
         i = 0
         for k, rs in regions.items():
             for region in rs:
-                indicator = self.indicator_regions[i]; i += 1
+                indicator = self.indicator_regions[i]
+                i += 1
                 indicator.show()
                 indicator.setRegion((region[0] - 0.5, region[1] + 0.5))
                 indicator.setBrush(self.colors[k] + "44")
@@ -144,7 +170,7 @@ class SegmentsGUI(QtWidgets.QSplitter):
                 region.show()
             else:
                 region.hide()
-        
+
         # plot channel
         yi = segments[self._channel_selector.get_value()]
         xi = np.arange(yi.size)

@@ -168,6 +168,10 @@ response = "int"
 doc = "Get the currently planned number of chunks."
 response = "int"
 
+[messages.get_segment_count_limits]
+doc = "Get current segment count limits as defined by on-board memory."
+response = {"type"="array", "items"="int"}
+
 [messages.set_edge_width_count]
 doc = "Set edge width count. Setting of zero turns off edge detection."
 request = [{"name"="count", "type"="int"}]
@@ -199,6 +203,7 @@ record_kind = "metadata"
 [properties.segment_count]
 getter = "get_segment_count"
 setter = "set_segment_count"
+limits_getter = "get_segment_count_limits"
 type = "int"
 control_kind = "normal"
 record_kind = "metadata"
