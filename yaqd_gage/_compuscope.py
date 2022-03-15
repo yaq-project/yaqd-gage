@@ -13,10 +13,7 @@ from ._constants import acq_status_codes, transfer_modes
 from ._pygage import PyGage
 
 
-impedences = {
-    "fifty": 50,
-    "onemeg": 1_000_000
-}
+impedences = {"fifty": 50, "onemeg": 1_000_000}
 
 
 class CompuScope(HasMeasureTrigger, IsSensor, IsDaemon):
@@ -72,6 +69,8 @@ class CompuScope(HasMeasureTrigger, IsSensor, IsDaemon):
                 self._channel_names.append(f"channel{i+1}_baseline")
         self._channel_units = {k: "V" for k in self._channel_names}
         self._samples: Dict[str, np.ndarray] = dict()
+        self._segment_count_limits = [1, self._pg.max_segment_count]
+        assert self._state["segment_count"] <= self._segment_count_limits[1]
         self.set_segment_count(self._state["segment_count"])
 
     def get_measured_samples(self):
@@ -80,8 +79,12 @@ class CompuScope(HasMeasureTrigger, IsSensor, IsDaemon):
     def get_segment_count(self) -> int:
         return self._state["segment_count"]
 
+    def get_segment_count_limits(self) -> List[int]:
+        return self._segment_count_limits
+
     async def _measure(self):
-        assert self._state["segment_count"] <= 4096  # soft limit just trying to prevent overflow
+        self._segment_count_limits = [1, self._pg.max_segment_count]
+        assert self._state["segment_count"] <= self._segment_count_limits[1]
         # start capture
         self._pg.start_capture()
         # wait for capture to complete
@@ -116,7 +119,7 @@ class CompuScope(HasMeasureTrigger, IsSensor, IsDaemon):
             seg = np.array(seg, dtype=float)
             buffer += seg
         # process samples array
-        buffer /= 2 ** 8  # THIS IS AN EXTRA FACTOR THAT I DO NOT UNDERSTAND!!!  -Blaise
+        buffer /= 2**8  # THIS IS AN EXTRA FACTOR THAT I DO NOT UNDERSTAND!!!  -Blaise
         buffer /= self._state["segment_count"]  # we summed across all segments before
         buffer /= self._config["record_count"]  # firmware sums accoss all records internally
         buffer *= -1

@@ -70,33 +70,35 @@ class PyGage(object):
 
     @property
     def interface(self):
-        if sys.maxsize > 2 ** 32:
+        if sys.maxsize > 2**32:
             import PyGage3_64 as pg  # type: ignore
         else:
             import PyGage3_32 as pg  # type: ignore
         return pg
 
+    @property
+    def max_segment_count(self):
+        system_info = self.get_system_info()
+        acq_info = self.get_acquisition_config()
+        out = system_info["MaxMemory"]
+        if acq_info["Mode"] >= 0x40000000:
+            out //= 32  # bits per sample, assuming firmware averaging
+        else:
+            out //= system_info["SampleBits"]
+        out //= acq_info["Depth"]
+        out //= acq_info["Mode"] % 0x40000000  # number of channels
+        return out
+
     @compuscope_error_handling
-    def set_acquisition_config(
-        self,
-        config
-    ):
+    def set_acquisition_config(self, config):
         return self.interface.SetAcquisitionConfig(self.handle, config)
 
     @compuscope_error_handling
-    def set_channel_config(
-        self,
-        channel_index,
-        config
-    ):
+    def set_channel_config(self, channel_index, config):
         return self.interface.SetChannelConfig(self.handle, channel_index, config)
 
     @compuscope_error_handling
-    def set_trigger_config(
-        self,
-        trigger_index,
-        config
-    ):
+    def set_trigger_config(self, trigger_index, config):
         # remember, unlike channels trigger indexes do not correspond to physical assigments
         return self.interface.SetTriggerConfig(self.handle, trigger_index, config)
 

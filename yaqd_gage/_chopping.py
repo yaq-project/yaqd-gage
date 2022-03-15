@@ -13,10 +13,7 @@ from ._constants import acq_status_codes, transfer_modes
 from ._pygage import PyGage
 
 
-impedences = {
-    "fifty": 50,
-    "onemeg": 1_000_000
-}
+impedences = {"fifty": 50, "onemeg": 1_000_000}
 
 
 class CompuScope(HasMeasureTrigger, IsSensor, IsDaemon):
@@ -79,6 +76,8 @@ class CompuScope(HasMeasureTrigger, IsSensor, IsDaemon):
         self._channel_units = {k: "V" for k in self._channel_names}
         self._samples: Dict[str, np.ndarray] = dict()
         self._segments: Dict[str, np.ndarray] = dict()
+        self._segment_count_limits = [1, self._pg.max_segment_count]
+        assert self._state["segment_count"] <= self._segment_count_limits[1]
         self.set_segment_count(self._state["segment_count"])
 
     def get_edge_width_count(self) -> int:
@@ -96,10 +95,14 @@ class CompuScope(HasMeasureTrigger, IsSensor, IsDaemon):
     def get_segment_count(self) -> int:
         return self._state["segment_count"]
 
+    def get_segment_count_limits(self) -> List[int]:
+        return self._segment_count_limits
+
     async def _measure(self):
+        self._segment_count_limits = [1, self._pg.max_segment_count]
         out = dict()
-        assert self._state["segment_count"] <= 4096  # soft limit just trying to prevent overflow
-        assert self._state["edge_width_count"] > 0  # sanity
+        assert self._state["segment_count"] <= self._segment_count_limits[1]
+        assert self._state["edge_width_count"] >= 0  # sanity
         # set segment_count, record_count
         segment_count = self._state["segment_count"]
         record_count = self._state["record_count"]
@@ -115,11 +118,12 @@ class CompuScope(HasMeasureTrigger, IsSensor, IsDaemon):
             if acq_status_codes[code] == "ACQ_STATUS_READY":
                 break
             await asyncio.sleep(0)
-        print("TIME WAITED", time.time() - before)
         # read out
         segments = {}
         for i in range(0, len(self._config["channels"])):
-            segments.update(self._process_single_channel(i, segment_count, record_count))
+            s = await self._process_single_channel(i, segment_count, record_count)
+            segments.update(s)
+            await asyncio.sleep(0)
         self._segments = segments
         # get edges
         if self._state["edge_width_count"]:
@@ -128,13 +132,18 @@ class CompuScope(HasMeasureTrigger, IsSensor, IsDaemon):
             edges = np.convolve(edges, np.full(self._state["edge_width_count"], True), mode="same")
         else:
             edges = np.full(segment_count, False)
+        await asyncio.sleep(0)
         # get regions
         self._segments["regions"] = np.full(self._state["segment_count"], "", dtype="<U1")
         regions = {k: [] for k in self._config["segment_bins"].keys()}
         for k, v in self._config["segment_bins"].items():
             start = None
             for i, voltage in enumerate(segments["ai3"]):
-                if v["min"] <= voltage <= v["max"] and i != segments["ai3"].size - 1 and not edges[i]:
+                if (
+                    v["min"] <= voltage <= v["max"]
+                    and i != segments["ai3"].size - 1
+                    and not edges[i]
+                ):
                     if start is None:
                         start = i
                 else:
@@ -143,6 +152,7 @@ class CompuScope(HasMeasureTrigger, IsSensor, IsDaemon):
                         regions[k].append(sl)
                         self._segments["regions"][sl] = k
                         start = None
+            await asyncio.sleep(0)
         # take means
         out["ai0"] = np.mean(segments["ai0"])
         out["ai1"] = np.mean(segments["ai1"])
@@ -169,9 +179,13 @@ class CompuScope(HasMeasureTrigger, IsSensor, IsDaemon):
         out["ai0_diff_ad"] = out["ai0_d"] - out["ai0_a"]
         return out
 
-    def _process_single_channel(self, channel_index: int, segment_count: int, record_count: int) -> Dict[str, Any]:
+    async def _process_single_channel(
+        self, channel_index: int, segment_count: int, record_count: int
+    ) -> Dict[str, Any]:
         out = dict()
         out[f"ai{channel_index}"] = np.zeros(segment_count, dtype=float)
+        system_info = self._pg.get_system_info()
+        channel_info = self._pg.get_channel_config(channel_index + 1)
         for segment_index in range(segment_count):
 
             # samples
@@ -183,13 +197,13 @@ class CompuScope(HasMeasureTrigger, IsSensor, IsDaemon):
                 transfer_mode=transfer_modes["data_32"],
             )[0]
             seg = np.array(seg, dtype=float)
-            seg /= 2 ** 8  # THIS IS AN EXTRA FACTOR THAT I DO NOT UNDERSTAND!!!  -Blaise
+            seg /= 2**8  # THIS IS AN EXTRA FACTOR THAT I DO NOT UNDERSTAND!!!  -Blaise
             seg /= record_count  # firmware sums accoss all records internally
             seg *= -1
-            seg += self._pg.get_system_info()["SampleOffset"]
-            seg /= self._pg.get_system_info()["SampleResolution"]
-            seg *= 2 * self._pg.get_channel_config(channel_index + 1)["InputRange"] / 1000
-            seg += self._pg.get_channel_config(channel_index + 1)["DcOffset"]
+            seg += system_info["SampleOffset"]
+            seg /= system_info["SampleResolution"]
+            seg *= 2 * channel_info["InputRange"] / 1000
+            seg += channel_info["DcOffset"]
             self._samples[f"ai{channel_index}"] = seg
 
             # signal
@@ -210,6 +224,8 @@ class CompuScope(HasMeasureTrigger, IsSensor, IsDaemon):
             if self._config["channels"][channel_index]["invert"]:
                 out[f"ai{channel_index}"][segment_index] *= -1
 
+            await asyncio.sleep(0)
+
         return out
 
     def set_edge_width_count(self, count: int) -> None:
@@ -217,7 +233,7 @@ class CompuScope(HasMeasureTrigger, IsSensor, IsDaemon):
 
     def set_record_count(self, count: int) -> int:
         self._state["record_count"] = count
-        return count  
+        return count
 
     def set_segment_count(self, count: int) -> int:
         self._state["segment_count"] = count

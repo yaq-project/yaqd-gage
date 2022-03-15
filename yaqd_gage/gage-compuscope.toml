@@ -145,9 +145,16 @@ response = "int"
 doc = "Set the chunk count."
 request = [{"name"="count", "type"="int"}]
 
-[fields]
+[messages.get_segment_count_limits]
+doc = "Get current segment count limits as defined by on-board memory."
+response = {"type"="array", "items"="int"}
 
-[fields.segment_count]
-getter = "get_nchunks"
-setter = "set_nchunks"
+[properties]
+
+[properties.segment_count]
+getter = "get_segment_count"
+setter = "set_segment_count"
+limits_getter = "get_segment_count_limits"
 type = "int"
+control_kind = "normal"
+record_kind = "metadata"
