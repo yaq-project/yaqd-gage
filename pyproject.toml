@@ -5,8 +5,7 @@ build-backend = "flit_core.buildapi"
 [tool.flit.metadata]
 module = "yaqd_gage"
 dist-name = "yaqd-gage"
-author = "Blaise Thompson"
-author-email = "blaise@untzag.com"
+author = "yaq developers"
 home-page = "https://yaq.fyi"
 description-file = "README.md"
 requires-python = ">=3.7"
@@ -29,8 +28,8 @@ classifiers = [
 ]
 
 [tool.flit.metadata.urls]
-Source = "https://gitlab.com/yaq/yaqd-gage"
-Issues = "https://gitlab.com/yaq/yaqd-gage/issues"
+Source = "https://github.com/yaq-project/yaqd-gage"
+Issues = "https://github.com/yaq-project/yaqd-gage/issues"
 
 [tool.flit.metadata.requires-extra]
 dev = ["black", "pre-commit"]
