@@ -22,3 +22,6 @@ GaGe will provide you with a `.pyd` file: `PyGage3_64.pyd` or `PyGage3_32.pyd`. 
 
 This open source software package is not officially supported by GaGe.
 
+## maintainers
+
+[Kent Myer](https://github.com/kameyer226)
