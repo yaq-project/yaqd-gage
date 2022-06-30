@@ -48,15 +48,11 @@ class SamplesGUI(QtWidgets.QSplitter):
         self._poll_periodically_bool = qtypes.Bool("poll periodically")
         self._poll_periodically_bool.updated_connect(self._on_poll_periodically_updated)
         plot_item.append(self._poll_periodically_bool)
-        self._poll_period = qtypes.Float(
-            "poll period (s)", value=1, minimum=0, maximum=1000
-        )
+        self._poll_period = qtypes.Float("poll period (s)", value=1, minimum=0, maximum=1000)
         self._poll_period.updated_connect(self._on_poll_periodically_updated)
         self.qclient.get_measured_samples.finished.connect(self._on_get_samples)
         plot_item.append(self._poll_period)
-        self._channel_selector = qtypes.Enum(
-            "channel", allowed=[f"ai{i}" for i in range(4)]
-        )
+        self._channel_selector = qtypes.Enum("channel", allowed=[f"ai{i}" for i in range(4)])
         self._channel_selector.updated_connect(lambda x: self.poll())
         plot_item.append(self._channel_selector)
 
@@ -82,25 +78,18 @@ class SamplesGUI(QtWidgets.QSplitter):
                 qtypes.Enum(
                     "coupling",
                     disabled=True,
-                    value=d["coupling"], allowed=["AC", "DC"],
+                    value=d["coupling"],
+                    allowed=["AC", "DC"],
                 )
             )
+            header.append(qtypes.Float("dc offset (V)", disabled=True, value=d["dc_offset"]))
             header.append(
-                qtypes.Float("dc offset (V)", disabled=True, value=d["dc_offset"])
+                qtypes.Integer("signal start index", disabled=True, value=d["signal_start_index"])
             )
             header.append(
-                qtypes.Integer(
-                    "signal start index", disabled=True, value=d["signal_start_index"]
-                )
+                qtypes.Integer("signal stop index", disabled=True, value=d["signal_stop_index"])
             )
-            header.append(
-                qtypes.Integer(
-                    "signal stop index", disabled=True, value=d["signal_stop_index"]
-                )
-            )
-            header.append(
-                qtypes.Bool("use baseline", disabled=True, value=d["use_baseline"])
-            )
+            header.append(qtypes.Bool("use baseline", disabled=True, value=d["use_baseline"]))
             header.append(
                 qtypes.Integer(
                     "baseline start index",
@@ -114,7 +103,6 @@ class SamplesGUI(QtWidgets.QSplitter):
                 )
             )
             header.append(qtypes.Bool("invert", disabled=True, value=d["invert"]))
-
 
         self._tree_widget.resizeColumnToContents(0)
 

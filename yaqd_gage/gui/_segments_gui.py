@@ -51,14 +51,10 @@ class SegmentsGUI(QtWidgets.QSplitter):
         self._poll_periodically_bool = qtypes.Bool("poll periodically")
         self._poll_periodically_bool.updated_connect(self._on_poll_periodically_updated)
         plot_item.append(self._poll_periodically_bool)
-        self._poll_period = qtypes.Float(
-            "poll period (s)", value=1, minimum=0, maximum=1000
-        )
+        self._poll_period = qtypes.Float("poll period (s)", value=1, minimum=0, maximum=1000)
         self._poll_period.updated_connect(self._on_poll_periodically_updated)
         plot_item.append(self._poll_period)
-        self._channel_selector = qtypes.Enum(
-            "channel", allowed=[f"ai{i}" for i in range(4)]
-        )
+        self._channel_selector = qtypes.Enum("channel", allowed=[f"ai{i}" for i in range(4)])
         self._channel_selector.updated_connect(lambda x: self.poll())
         plot_item.append(self._channel_selector)
         self._max_segments_shown = qtypes.Integer(
@@ -91,14 +87,10 @@ class SegmentsGUI(QtWidgets.QSplitter):
             header = qtypes.Null(k)
             bins_item.append(header)
             header.append(
-                qtypes.Float(
-                    "min", disabled=True, value=config["segment_bins"][k]["min"]
-                )
+                qtypes.Float("min", disabled=True, value=config["segment_bins"][k]["min"])
             )
             header.append(
-                qtypes.Float(
-                    "max", disabled=True, value=config["segment_bins"][k]["max"]
-                )
+                qtypes.Float("max", disabled=True, value=config["segment_bins"][k]["max"])
             )
 
         self._tree_widget.resizeColumnToContents(0)
