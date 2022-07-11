@@ -69,6 +69,7 @@ class SamplesGUI(QtWidgets.QSplitter):
     def _on_get_config(self, config):
         config = toml.loads(config)
         self._config = config
+        self.config_item.clear()
 
         for i, d in enumerate(config["channels"]):
             header = qtypes.Null(f"ai{i}")
@@ -107,8 +108,9 @@ class SamplesGUI(QtWidgets.QSplitter):
         self._tree_widget.resizeColumnToContents(0)
 
     def _on_get_samples(self, samples):
+        self._channel_selector.set({"allowed": list(samples.keys())})
         channel_name = self._channel_selector.get_value()
-        channel_index = int(channel_name[-1])
+        channel_index = list(samples.keys()).index(channel_name)
         yi = samples[self._channel_selector.get_value()]
         xi = np.arange(yi.size)
         self.scatter.setData(xi, yi)
@@ -133,5 +135,5 @@ class SamplesGUI(QtWidgets.QSplitter):
         else:
             self._timer.stop()
 
-    def poll(self):
+    def poll(self, _=None):
         self.qclient.get_measured_samples()

@@ -40,7 +40,7 @@ class SegmentsGUI(QtWidgets.QSplitter):
             self.plot_widget.plot_object.addItem(item)
         self.addWidget(self.plot_widget)
 
-        self._root_item = qtypes.TreeWidget(width=500)
+        self._root_item = qtypes.Null()
 
         # plot control
         plot_item = qtypes.Null("plot")
@@ -80,6 +80,7 @@ class SegmentsGUI(QtWidgets.QSplitter):
     def _on_get_config(self, config):
         config = toml.loads(config)
         self._config = config
+        self.config_item.clear()
 
         bins_item = qtypes.Null("segment bins")
         self.config_item.append(bins_item)
@@ -170,5 +171,5 @@ class SegmentsGUI(QtWidgets.QSplitter):
         else:
             self._timer.stop()
 
-    def poll(self):
+    def poll(self, _=None):
         self.qclient.get_measured_segments()
