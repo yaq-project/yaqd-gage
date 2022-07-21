@@ -40,71 +40,60 @@ class SegmentsGUI(QtWidgets.QSplitter):
             self.plot_widget.plot_object.addItem(item)
         self.addWidget(self.plot_widget)
 
-        self._tree_widget = qtypes.TreeWidget(width=500)
+        self._root_item = qtypes.Null()
 
         # plot control
         plot_item = qtypes.Null("plot")
-        self._tree_widget.append(plot_item)
+        self._root_item.append(plot_item)
         self._poll_button = qtypes.Button("poll now")
-        self._poll_button.updated.connect(self.poll)
+        self._poll_button.updated_connect(self.poll)
         plot_item.append(self._poll_button)
         self._poll_periodically_bool = qtypes.Bool("poll periodically")
-        self._poll_periodically_bool.updated.connect(self._on_poll_periodically_updated)
+        self._poll_periodically_bool.updated_connect(self._on_poll_periodically_updated)
         plot_item.append(self._poll_periodically_bool)
-        self._poll_period = qtypes.Float(
-            "poll period (s)", value={"value": 1, "minimum": 0, "maximum": 1000}
-        )
-        self._poll_period.updated.connect(self._on_poll_periodically_updated)
+        self._poll_period = qtypes.Float("poll period (s)", value=1, minimum=0, maximum=1000)
+        self._poll_period.updated_connect(self._on_poll_periodically_updated)
         plot_item.append(self._poll_period)
-        self._channel_selector = qtypes.Enum(
-            "channel", value={"allowed": [f"ai{i}" for i in range(4)]}
-        )
-        self._channel_selector.updated.connect(lambda x: self.poll())
+        self._channel_selector = qtypes.Enum("channel", allowed=[f"ai{i}" for i in range(4)])
+        self._channel_selector.updated_connect(lambda x: self.poll())
         plot_item.append(self._channel_selector)
         self._max_segments_shown = qtypes.Integer(
-            "max segments shown", value={"value": 1_000, "minimum": 10, "maximum": 1_000}
+            "max segments shown", value=1_000, minimum=10, maximum=1_000
         )
         plot_item.append(self._max_segments_shown)
-        plot_item.setExpanded(True)
 
         # config
         self.config_item = qtypes.Null("config")
-        self._tree_widget.append(self.config_item)
+        self._root_item.append(self.config_item)
         self.qclient.get_config.finished.connect(self._on_get_config)
         self.qclient.get_config()
 
         # properties
         properties_item = qtypes.Null("properties")
-        self._tree_widget.append(properties_item)
+        self._root_item.append(properties_item)
         qtype_items.append_properties(self.qclient, properties_item)
-        properties_item.setExpanded(True)
 
+        self._tree_widget = qtypes.TreeWidget(self._root_item)
         self._tree_widget.resizeColumnToContents(0)
         self.addWidget(self._tree_widget)
 
     def _on_get_config(self, config):
         config = toml.loads(config)
         self._config = config
+        self.config_item.clear()
 
         bins_item = qtypes.Null("segment bins")
         self.config_item.append(bins_item)
-        bins_item.setExpanded(True)
         for k, v in config["segment_bins"].items():
             header = qtypes.Null(k)
             bins_item.append(header)
             header.append(
-                qtypes.Float(
-                    "min", disabled=True, value={"value": config["segment_bins"][k]["min"]}
-                )
+                qtypes.Float("min", disabled=True, value=config["segment_bins"][k]["min"])
             )
             header.append(
-                qtypes.Float(
-                    "max", disabled=True, value={"value": config["segment_bins"][k]["max"]}
-                )
+                qtypes.Float("max", disabled=True, value=config["segment_bins"][k]["max"])
             )
-            header.setExpanded(True)
 
-        self.config_item.setExpanded(True)
         self._tree_widget.resizeColumnToContents(0)
 
         # segment bins
@@ -182,5 +171,5 @@ class SegmentsGUI(QtWidgets.QSplitter):
         else:
             self._timer.stop()
 
-    def poll(self):
+    def poll(self, _=None):
         self.qclient.get_measured_segments()

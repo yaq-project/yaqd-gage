@@ -37,92 +37,80 @@ class SamplesGUI(QtWidgets.QSplitter):
         self.baseline_mean = self.plot_widget.add_infinite_line(color="#cc6666", angle=0)
         self.addWidget(self.plot_widget)
 
-        self._tree_widget = qtypes.TreeWidget(width=500)
+        self._root_item = qtypes.Null()
 
         # plot control
         plot_item = qtypes.Null("plot")
-        self._tree_widget.append(plot_item)
+        self._root_item.append(plot_item)
         self._poll_button = qtypes.Button("poll now")
-        self._poll_button.updated.connect(self.poll)
+        self._poll_button.updated_connect(self.poll)
         plot_item.append(self._poll_button)
         self._poll_periodically_bool = qtypes.Bool("poll periodically")
-        self._poll_periodically_bool.updated.connect(self._on_poll_periodically_updated)
+        self._poll_periodically_bool.updated_connect(self._on_poll_periodically_updated)
         plot_item.append(self._poll_periodically_bool)
-        self._poll_period = qtypes.Float(
-            "poll period (s)", value={"value": 1, "minimum": 0, "maximum": 1000}
-        )
-        self._poll_period.updated.connect(self._on_poll_periodically_updated)
+        self._poll_period = qtypes.Float("poll period (s)", value=1, minimum=0, maximum=1000)
+        self._poll_period.updated_connect(self._on_poll_periodically_updated)
         self.qclient.get_measured_samples.finished.connect(self._on_get_samples)
         plot_item.append(self._poll_period)
-        self._channel_selector = qtypes.Enum(
-            "channel", value={"allowed": [f"ai{i}" for i in range(4)]}
-        )
-        self._channel_selector.updated.connect(lambda x: self.poll())
+        self._channel_selector = qtypes.Enum("channel", allowed=[f"ai{i}" for i in range(4)])
+        self._channel_selector.updated_connect(lambda x: self.poll())
         plot_item.append(self._channel_selector)
-        plot_item.setExpanded(True)
 
         # config
         self.config_item = qtypes.Null("config")
-        self._tree_widget.append(self.config_item)
+        self._root_item.append(self.config_item)
         self.qclient.get_config.finished.connect(self._on_get_config)
         self.qclient.get_config()
 
+        self._tree_widget = qtypes.TreeWidget(self._root_item)
         self._tree_widget.resizeColumnToContents(0)
         self.addWidget(self._tree_widget)
 
     def _on_get_config(self, config):
         config = toml.loads(config)
         self._config = config
+        self.config_item.clear()
 
         for i, d in enumerate(config["channels"]):
             header = qtypes.Null(f"ai{i}")
             self.config_item.append(header)
-            header.append(qtypes.Integer("range (mV)", disabled=True, value={"value": d["range"]}))
+            header.append(qtypes.Integer("range (mV)", disabled=True, value=d["range"]))
             header.append(
                 qtypes.Enum(
                     "coupling",
                     disabled=True,
-                    value={"value": d["coupling"], "allowed": ["AC", "DC"]},
+                    value=d["coupling"],
+                    allowed=["AC", "DC"],
                 )
             )
+            header.append(qtypes.Float("dc offset (V)", disabled=True, value=d["dc_offset"]))
             header.append(
-                qtypes.Float("dc offset (V)", disabled=True, value={"value": d["dc_offset"]})
+                qtypes.Integer("signal start index", disabled=True, value=d["signal_start_index"])
             )
             header.append(
-                qtypes.Integer(
-                    "signal start index", disabled=True, value={"value": d["signal_start_index"]}
-                )
+                qtypes.Integer("signal stop index", disabled=True, value=d["signal_stop_index"])
             )
-            header.append(
-                qtypes.Integer(
-                    "signal stop index", disabled=True, value={"value": d["signal_stop_index"]}
-                )
-            )
-            header.append(
-                qtypes.Bool("use baseline", disabled=True, value={"value": d["use_baseline"]})
-            )
+            header.append(qtypes.Bool("use baseline", disabled=True, value=d["use_baseline"]))
             header.append(
                 qtypes.Integer(
                     "baseline start index",
                     disabled=True,
-                    value={"value": d["baseline_start_index"]},
+                    value=d["baseline_start_index"],
                 )
             )
             header.append(
                 qtypes.Integer(
-                    "baseline stop index", disabled=True, value={"value": d["baseline_stop_index"]}
+                    "baseline stop index", disabled=True, value=d["baseline_stop_index"]
                 )
             )
-            header.append(qtypes.Bool("invert", disabled=True, value={"value": d["invert"]}))
+            header.append(qtypes.Bool("invert", disabled=True, value=d["invert"]))
 
-            header.setExpanded(True)
-
-        self.config_item.setExpanded(True)
         self._tree_widget.resizeColumnToContents(0)
 
     def _on_get_samples(self, samples):
+        self._channel_selector.set({"allowed": list(samples.keys())})
         channel_name = self._channel_selector.get_value()
-        channel_index = int(channel_name[-1])
+        channel_index = list(samples.keys()).index(channel_name)
         yi = samples[self._channel_selector.get_value()]
         xi = np.arange(yi.size)
         self.scatter.setData(xi, yi)
@@ -147,5 +135,5 @@ class SamplesGUI(QtWidgets.QSplitter):
         else:
             self._timer.stop()
 
-    def poll(self):
+    def poll(self, _=None):
         self.qclient.get_measured_samples()
