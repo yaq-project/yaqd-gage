@@ -5,6 +5,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [2022.7.0]
+
 ### Changed
 - Updated to new version of qtypes for yaqc-qtpy plugins
 
@@ -46,7 +48,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 ### Added
 - initial release
 
-[Unreleased]: https://github.com/yaq-project/yaqd-gage/compare/v2022.6.0...main
+[Unreleased]: https://github.com/yaq-project/yaqd-gage/compare/v2022.7.0...main
+[2022.7.0]: https://github.com/yaq-project/yaqd-gage/compare/v2022.6.0...2022.7.0
 [2022.6.0]: https://github.com/yaq-project/yaqd-gage/compare/v2022.3.0...2022.6.0
 [2022.3.0]: https://github.com/yaq-project/yaqd-gage/compare/v2022.1.0...2022.3.0
 [2022.1.0]: https://github.com/yaq-project/yaqd-gage/compare/v2021.3.0...2022.1.0
