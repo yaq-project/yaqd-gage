@@ -187,7 +187,6 @@ class CompuScope(HasMeasureTrigger, IsSensor, IsDaemon):
         system_info = self._pg.get_system_info()
         channel_info = self._pg.get_channel_config(channel_index + 1)
         for segment_index in range(segment_count):
-
             # samples
             seg = self._pg.transfer_data(
                 channel_index=channel_index + 1,
