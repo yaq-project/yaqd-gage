@@ -5,6 +5,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+### Added
+- example-yaq-config folder with example config TOML
+
 ## [2022.7.0]
 
 ### Changed
