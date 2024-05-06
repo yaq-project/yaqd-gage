@@ -1,6 +1,5 @@
 """Wrapper to normalize PyGage support."""
 
-
 import sys
 import time
 

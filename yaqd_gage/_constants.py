@@ -1,6 +1,5 @@
 """GaGe defined constants."""
 
-
 # compuscope status codes (returned by CsGetStatus)
 acq_status_codes = dict()
 acq_status_codes[0] = "ACQ_STATUS_READY"
@@ -203,12 +202,12 @@ transfer_modes["timestamp"] = 0x02  # transfer time-stamp information
 transfer_modes["data_16"] = 0x04  # transfer all data bits including digital input bits
 transfer_modes["data_onlydigital"] = 0x08  # transfer only digital input bits
 transfer_modes["data_32"] = 0x10  # transfer data as 32 bit samples
-transfer_modes[
-    "data_fft"
-] = 0x30  # transfer data in fft format. should be used only with expert fft firmware
+transfer_modes["data_fft"] = (
+    0x30  # transfer data in fft format. should be used only with expert fft firmware
+)
 transfer_modes["data_interleaved"] = 0x40  # transfer data in interleaved format
 transfer_modes["segment_tail"] = 0x80  # transfer segment tail in raw data format
-transfer_modes[
-    "histogram"
-] = 0x100  # transfer histogram data (cobra pci only). should be use only with expert histogram
+transfer_modes["histogram"] = (
+    0x100  # transfer histogram data (cobra pci only). should be use only with expert histogram
+)
 transfer_modes["data_64"] = 0x200  # transfer data as 64 bit samples
