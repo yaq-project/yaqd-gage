@@ -1,0 +1,57 @@
+[daq]
+port = 39003
+sample_rate = 25000000
+depth = 480
+segment_size = 480
+record_count = 3
+loop_at_startup = true
+
+[[daq.channels]]
+range = 2000
+coupling = "DC"
+impedance = "fifty"
+signal_start_index = 5
+signal_stop_index = 45
+baseline_start_index = 440
+baseline_stop_index = 480
+use_baseline = true
+
+[[daq.channels]]
+range = 2000
+coupling = "AC"
+impedance = "fifty"
+signal_start_index = 5
+signal_stop_index = 55
+baseline_start_index = 80
+baseline_stop_index = 120
+use_baseline = true
+
+[[daq.channels]]
+range = 2000
+coupling = "AC"
+impedance = "fifty"
+signal_start_index = 5
+signal_stop_index = 55
+baseline_start_index = 80
+baseline_stop_index = 120
+use_baseline = true
+invert = true
+
+[[daq.channels]]
+range = 2000
+coupling = "DC"
+impedance = "onemeg"
+signal_start_index = 5
+signal_stop_index = 55
+baseline_start_index = 80
+baseline_stop_index = 120
+use_baseline = false
+
+[[daq.triggers]]
+condition = 1
+level = 10.0
+source = -1
+range = 10000
+coupling = "DC"
+impedance = "fifty"
+

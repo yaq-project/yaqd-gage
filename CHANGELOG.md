@@ -5,6 +5,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [2026.1.0]
+
+### Added
+- example-yaq-config folder with example config TOML
+
 ## [2022.7.0]
 
 ### Changed
@@ -48,11 +53,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 ### Added
 - initial release
 
-[Unreleased]: https://github.com/yaq-project/yaqd-gage/compare/v2022.7.0...main
-[2022.7.0]: https://github.com/yaq-project/yaqd-gage/compare/v2022.6.0...2022.7.0
-[2022.6.0]: https://github.com/yaq-project/yaqd-gage/compare/v2022.3.0...2022.6.0
-[2022.3.0]: https://github.com/yaq-project/yaqd-gage/compare/v2022.1.0...2022.3.0
-[2022.1.0]: https://github.com/yaq-project/yaqd-gage/compare/v2021.3.0...2022.1.0
-[2021.3.0]: https://github.com/yaq-project/yaqd-gage/compare/v2021.1.0...2021.3.0
+[Unreleased]: https://github.com/yaq-project/yaqd-gage/compare/v2026.1.0...main
+[2026.1.0]: https://github.com/yaq-project/yaqd-gage/compare/v2022.7.0...v2026.1.0
+[2022.7.0]: https://github.com/yaq-project/yaqd-gage/compare/v2022.6.0...v2022.7.0
+[2022.6.0]: https://github.com/yaq-project/yaqd-gage/compare/v2022.3.0...v2022.6.0
+[2022.3.0]: https://github.com/yaq-project/yaqd-gage/compare/v2022.1.0...v2022.3.0
+[2022.1.0]: https://github.com/yaq-project/yaqd-gage/compare/v2021.3.0...v2022.1.0
+[2021.3.0]: https://github.com/yaq-project/yaqd-gage/compare/v2021.1.0...v2021.3.0
 [2021.1.0]: https://github.com/yaq-project/yaqd-gage/releases/tag/v2021.1.0
-
