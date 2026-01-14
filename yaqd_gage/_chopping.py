@@ -76,8 +76,7 @@ class CompuScope(HasMeasureTrigger, IsSensor, IsDaemon):
         self._channel_units = {k: "V" for k in self._channel_names}
         self._samples: Dict[str, np.ndarray] = dict()
         self._segments: Dict[str, np.ndarray] = dict()
-        self._segment_count_limits = [1, self._pg.max_segment_count]
-        assert self._state["segment_count"] <= self._segment_count_limits[1]
+        assert self._state["segment_count"] <= self.segment_count_limits[1]
         self.set_segment_count(self._state["segment_count"])
 
     def get_edge_width_count(self) -> int:
@@ -96,12 +95,15 @@ class CompuScope(HasMeasureTrigger, IsSensor, IsDaemon):
         return self._state["segment_count"]
 
     def get_segment_count_limits(self) -> List[int]:
-        return self._segment_count_limits
+        return self.segment_count_limits
+
+    @property
+    def segment_count_limits(self):
+        return [1, self._pg.max_segment_count]
 
     async def _measure(self):
-        self._segment_count_limits = [1, self._pg.max_segment_count]
         out = dict()
-        assert self._state["segment_count"] <= self._segment_count_limits[1]
+        assert self._state["segment_count"] <= self.segment_count_limits[1]
         assert self._state["edge_width_count"] >= 0  # sanity
         # set segment_count, record_count
         segment_count = self._state["segment_count"]
