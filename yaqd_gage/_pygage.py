@@ -1,7 +1,6 @@
 """Wrapper to normalize PyGage support."""
 
 import sys
-import time
 
 import numpy as np  # type: ignore
 
@@ -22,6 +21,7 @@ def compuscope_error_handling(func):
 
 
 class PyGage(object):
+
     def __init__(self):
         self.initialize()
         self.handle = self.get_system()
@@ -68,7 +68,7 @@ class PyGage(object):
         return self.interface.Initialize()
 
     @property
-    def interface(self):
+    def interface(self) -> object:
         if sys.maxsize > 2**32:
             import PyGage3_64 as pg  # type: ignore
         else:
