@@ -2,14 +2,16 @@
 requires = ["flit_core >=2,<4"]
 build-backend = "flit_core.buildapi"
 
-[tool.flit.metadata]
-module = "yaqd_gage"
-dist-name = "yaqd-gage"
-author = "yaq developers"
-home-page = "https://yaq.fyi"
-description-file = "README.md"
+[project]
+name = "yaqd-gage"
+authors = [
+  {name = "Blaise Thompson", email="blaise@untzag.com"},
+]
+maintainers = [
+  {name="yaq Developers"},
+]
 requires-python = ">=3.7"
-requires = ["yaqd-core>=2020.06.3",
+dependencies = ["yaqd-core>=2020.06.3",
             "numpy",
             "toml>=0.10.2",
             "yaq-traits",
@@ -19,30 +21,32 @@ requires = ["yaqd-core>=2020.06.3",
 classifiers = [
     "Development Status :: 2 - Pre-Alpha",
     "Intended Audience :: Science/Research",
-    "License :: OSI Approved :: GNU Lesser General Public License v3 (LGPLv3)",
     "Natural Language :: English",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.7",
     "Programming Language :: Python :: 3.8",
     "Topic :: Scientific/Engineering",
 ]
+license = "LGPL-3.0-or-later"
+dynamic = ["version"]
 
-[tool.flit.metadata.urls]
+[project.urls]
+Homepage = "https://yaq.fyi"
 Source = "https://github.com/yaq-project/yaqd-gage"
 Issues = "https://github.com/yaq-project/yaqd-gage/issues"
 
-[tool.flit.metadata.requires-extra]
+[project.optional-dependencies]
 dev = ["black", "pre-commit"]
 
-[tool.flit.scripts]
+[project.scripts]
 yaqd-gage-compuscope = "yaqd_gage._compuscope:CompuScope.main"
 yaqd-gage-chopping = "yaqd_gage._chopping:CompuScope.main"
 
-[tool.flit.entrypoints."yaqc_qtpy.main.gage_chopping"]
+[project.entry-points."yaqc_qtpy.main.gage_chopping"]
 gage-samples = "yaqd_gage.gui._samples_gui:SamplesGUI"
 gage-segments = "yaqd_gage.gui._segments_gui:SegmentsGUI"
 
-[tool.flit.entrypoints."yaqc_qtpy.main.gage_compuscope"]
+[project.entry-points."yaqc_qtpy.main.gage_compuscope"]
 gage-samples = "yaqd_gage.gui._samples_gui:SamplesGUI"
 
 [tool.black]
