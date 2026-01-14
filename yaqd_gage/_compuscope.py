@@ -96,12 +96,12 @@ class CompuScope(HasMeasureTrigger, IsSensor, IsDaemon):
             if acq_status_codes[code] == "ACQ_STATUS_READY":
                 break
             await asyncio.sleep(0)
-        print("TIME WAITED", time.time() - before)
+        self.logger.debug("TIME WAITED", time.time() - before)
         # read out
         out = {}
         for i in range(0, len(self._config["channels"])):
             out.update(self._process_single_channel(i))
-        print(out)
+        self.logger.debug(out)
         return out
 
     def _process_single_channel(self, channel_index: int) -> Dict[str, float]:
