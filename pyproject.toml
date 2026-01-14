@@ -4,6 +4,7 @@ build-backend = "flit_core.buildapi"
 
 [project]
 name = "yaqd-gage"
+description = "yaq daemons for GaGe hardware"
 authors = [
   {name = "Blaise Thompson", email="blaise@untzag.com"},
 ]
