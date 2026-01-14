@@ -27,9 +27,19 @@ class PyGage(object):
         self.handle = self.get_system()
 
     @compuscope_error_handling
+    def abort_capture(self):
+        """Aborts an acquisition or transfer on the CompuScope system."""
+        return self.interface.AbortCapture(self.handle)
+
+    @compuscope_error_handling
     def commit(self):
         """Commit any configuration changes to device."""
         return self.interface.Commit(self.handle)
+
+    @compuscope_error_handling
+    def free_system(self):
+        """Frees the system associated with the handle"""
+        return self.interface.FreeSystem(self.handle)
 
     @compuscope_error_handling
     def get_acquisition_config(self):
