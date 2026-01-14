@@ -237,3 +237,9 @@ class CompuScope(HasMeasureTrigger, IsSensor, IsDaemon):
     def set_segment_count(self, count: int) -> int:
         self._state["segment_count"] = count
         return count
+
+    def close(self):
+        """close connection to gage board"""
+        if self._busy:
+            self._pg.abort_capture()
+        self._pg.free_system()
