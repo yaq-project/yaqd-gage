@@ -1,7 +1,6 @@
 """Wrapper to normalize PyGage support."""
 
 import sys
-import time
 
 import numpy as np  # type: ignore
 
@@ -22,6 +21,15 @@ def compuscope_error_handling(func):
 
 
 class PyGage(object):
+
+    @property
+    def interface(self) -> object:
+        if sys.maxsize > 2**32:
+            import PyGage3_64 as pg  # type: ignore
+        else:
+            import PyGage3_32 as pg  # type: ignore
+        return pg
+
     def __init__(self):
         self.initialize()
         self.handle = self.get_system()
@@ -52,6 +60,10 @@ class PyGage(object):
         return self.interface.GetTriggerConfig(self.handle, trigger_index)
 
     @compuscope_error_handling
+    def abort_capture(self):
+        return self.interface.AbortCapture(self.handle)
+
+    @compuscope_error_handling
     def get_system(self):
         # I don't understand what the arguments to this function
         # (the four zeros) do. It's working for me right now.
@@ -66,14 +78,6 @@ class PyGage(object):
     @compuscope_error_handling
     def initialize(self):
         return self.interface.Initialize()
-
-    @property
-    def interface(self):
-        if sys.maxsize > 2**32:
-            import PyGage3_64 as pg  # type: ignore
-        else:
-            import PyGage3_32 as pg  # type: ignore
-        return pg
 
     @property
     def max_segment_count(self):
