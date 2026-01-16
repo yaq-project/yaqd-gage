@@ -232,6 +232,7 @@ class CompuScope(HasMeasureTrigger, IsSensor, IsDaemon):
         return out
 
     def set_edge_width_count(self, count: int) -> None:
+        assert count >= 0  # no limits_getter atm
         self._state["edge_width_count"] = count
 
     def set_record_count(self, count: int) -> None:
