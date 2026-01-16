@@ -89,7 +89,9 @@ class CompuScope(HasMeasureTrigger, IsSensor, IsDaemon):
 
     @async_uses_pygage
     async def _measure(self):
-        assert self._state["segment_count"] <= self._max_segment_count
+        # apply state
+        self._pg.set_acquisition_config({"SegmentCount": self._state["segment_count"]})
+        self._pg.commit()
         # start capture
         self._pg.start_capture()
         # wait for capture to complete
@@ -153,7 +155,5 @@ class CompuScope(HasMeasureTrigger, IsSensor, IsDaemon):
         return out
 
     def set_segment_count(self, count: int) -> None:
+        assert count <= self._max_segment_count
         self._state["segment_count"] = count
-        self._pg.set_acquisition_config({"SegmentCount": self._state["segment_count"]})
-        self._pg.commit()
-
