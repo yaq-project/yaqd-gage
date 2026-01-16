@@ -234,9 +234,8 @@ class CompuScope(HasMeasureTrigger, IsSensor, IsDaemon):
     def set_edge_width_count(self, count: int) -> None:
         self._state["edge_width_count"] = count
 
-    def set_record_count(self, count: int) -> int:
+    def set_record_count(self, count: int) -> None:
         self._state["record_count"] = count
-        return count
 
-    def set_segment_count(self, count: int) -> int:
+    def set_segment_count(self, count: int) -> None:
         self._state["segment_count"] = count

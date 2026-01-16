@@ -152,9 +152,8 @@ class CompuScope(HasMeasureTrigger, IsSensor, IsDaemon):
             out[f"channel{channel_index+1}"] *= -1
         return out
 
-    def set_segment_count(self, count: int) -> int:
+    def set_segment_count(self, count: int) -> None:
         self._state["segment_count"] = count
         self._pg.set_acquisition_config({"SegmentCount": self._state["segment_count"]})
         self._pg.commit()
-        return count
 
