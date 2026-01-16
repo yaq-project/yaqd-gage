@@ -12,9 +12,10 @@ from ._constants import transfer_modes
 
 def uses_pygage(func):
     """decorator for pygage context management"""
+
     @wraps(func)
     def wrapper(self, *args, **kwargs):
-        pg:PyGage = getattr(self, "_pg", None)
+        pg: PyGage = getattr(self, "_pg", None)
         try:
             return func(self, *args, **kwargs)
         finally:
@@ -22,14 +23,16 @@ def uses_pygage(func):
             # ignore errors, which are probably from closing when already closed
             if isinstance(code, int) and code < 0:
                 self.logger.error(f"{func.__name__} : FreeSystem : {code=}")
+
     return wrapper
 
 
 def async_uses_pygage(func):
     """decorator for async pygage context management"""
+
     @wraps(func)
     async def wrapper(self, *args, **kwargs):
-        pg:PyGage = getattr(self, "_pg", None)
+        pg: PyGage = getattr(self, "_pg", None)
         try:
             return await func(self, *args, **kwargs)
         finally:
@@ -37,6 +40,7 @@ def async_uses_pygage(func):
             # ignore errors, which are probably from closing when already closed
             if isinstance(code, int) and code < 0:
                 self.logger.error(f"{func.__name__} : FreeSystem : {code=}")
+
     return wrapper
 
 

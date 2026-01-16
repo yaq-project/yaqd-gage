@@ -156,4 +156,3 @@ class CompuScope(HasMeasureTrigger, IsSensor, IsDaemon):
         self._state["segment_count"] = count
         self._pg.set_acquisition_config({"SegmentCount": self._state["segment_count"]})
         self._pg.commit()
-
