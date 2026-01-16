@@ -62,7 +62,7 @@
         },
         "mode": {
             "default": 1073741828,
-            "doc": "Sets the operating mode of the CompuScope system. Refer to the CompuScope documentation for valid values. Default is 1073741825 for FirmWare Averaging",
+            "doc": "Sets the operating mode of the CompuScope system. Refer to the CompuScope documentation for valid values. Default is 1073741828 for FirmWare Averaging and four channels.",
             "type": "int"
         },
         "model": {
@@ -253,7 +253,7 @@
             }
         },
         "get_record_count": {
-            "doc": "Get record count.",
+            "doc": "Get the number of acquisitions that are averaged on-board via firmware.",
             "request": [],
             "response": "int"
         },
