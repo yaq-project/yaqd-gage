@@ -12,7 +12,7 @@ from ._constants import transfer_modes
 def to_voltage(adc, repetitions, offset, dc_offset, full_range, resolution):
     """
     converts buffer to voltage values as specified from SDK docs:
-    
+
     voltage[mV] = (offset - adc_code)/resolution * full_scale_voltage / 2 + dc_offset
     """
     adc *= -1 / repetitions
