@@ -5,6 +5,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+### Changed
+- adc-to-voltage conversion formula now matches that of the SDK docs (64x different from previous formula)
+
 ## [2026.1.0]
 
 ### Added
