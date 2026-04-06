@@ -12,7 +12,6 @@ from yaqd_core import HasMeasureTrigger, IsSensor, IsDaemon
 from ._constants import acq_status_codes, transfer_modes
 from ._pygage import PyGage
 
-
 impedences = {"fifty": 50, "onemeg": 1_000_000}
 
 
