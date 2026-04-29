@@ -250,6 +250,9 @@ class CompuScope(HasMeasureTrigger, IsSensor, IsDaemon):
 
         return out
 
+    def close(self):
+        self._pg.free_system()
+
     def set_edge_width_count(self, count: int) -> None:
         assert count >= 0  # no limits_getter atm
         self._state["edge_width_count"] = count
