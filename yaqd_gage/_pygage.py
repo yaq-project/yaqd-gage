@@ -40,10 +40,9 @@ def async_uses_pygage(func):
         except Exception as e:
             self.logger.exception(f"error in {func.__name__}")
             code = pg.interface.FreeSystem(pg.handle)
-            # ignore errors, which are probably from closing when already closed
-            if isinstance(code, int) and code < 0:
+            if code != -6:  # ignore -6, which means the system is already freed
                 self.logger.error(f"{func.__name__} : FreeSystem : code={code}")
-            raise e
+                raise e
 
     return wrapper
 

@@ -80,7 +80,7 @@ class CompuScope(HasMeasureTrigger, IsSensor, IsDaemon):
             self._pg.set_channel_config(channel_index + 1, config)
         # trigger config
         for trigger_index, trigger in enumerate(self._config["triggers"]):
-            tcfg = self._pg.get_trigger_config(-1)
+            tcfg = self._pg.get_trigger_config(trigger_index+1)
             self.logger.info(tcfg)
             config = {}
             config["Condition"] = trigger["condition"]
