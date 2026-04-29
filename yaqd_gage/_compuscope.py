@@ -10,7 +10,7 @@ import numpy as np  # type: ignore
 from yaqd_core import HasMeasureTrigger, IsSensor, IsDaemon
 
 from ._constants import acq_status_codes, transfer_modes
-from ._pygage import PyGage
+from ._pygage import PyGage, to_voltage
 
 
 impedences = {"fifty": 50, "onemeg": 1_000_000}
@@ -106,8 +106,9 @@ class CompuScope(HasMeasureTrigger, IsSensor, IsDaemon):
         out = dict()
         # TODO: think about perhaps other dtypes
         buffer = np.zeros(self._config["depth"], dtype=float)
+        system_info = self._pg.get_system_info()
+        channel_info = self._pg.get_channel_config(channel_index + 1)
         for segment in range(self._state["segment_count"]):
-            # TODO: get segment count from gage
             # TODO: guess transfer mode from if multirecord averaging
             seg = self._pg.transfer_data(
                 channel_index=channel_index + 1,
@@ -119,14 +120,14 @@ class CompuScope(HasMeasureTrigger, IsSensor, IsDaemon):
             seg = np.array(seg, dtype=float)
             buffer += seg
         # process samples array
-        buffer /= 2**8  # THIS IS AN EXTRA FACTOR THAT I DO NOT UNDERSTAND!!!  -Blaise
-        buffer /= self._state["segment_count"]  # we summed across all segments before
-        buffer /= self._config["record_count"]  # firmware sums accoss all records internally
-        buffer *= -1
-        buffer += self._pg.get_system_info()["SampleOffset"]
-        buffer /= self._pg.get_system_info()["SampleResolution"]
-        buffer *= 2 * self._pg.get_channel_config(channel_index + 1)["InputRange"] / 1000
-        buffer += self._pg.get_channel_config(channel_index + 1)["DcOffset"]
+        buffer = to_voltage(
+            buffer,
+            self._state["segment_count"] * self._config["record_count"],
+            system_info["SampleOffset"],
+            channel_info["DcOffset"],
+            channel_info["InputRange"],
+            system_info["SampleResolution"],
+        )
         self._samples[f"channel{channel_index+1}"] = buffer
         # signal
         start = self._config["channels"][channel_index]["signal_start_index"]
