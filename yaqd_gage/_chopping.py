@@ -53,7 +53,7 @@ class CompuScope(HasMeasureTrigger, IsSensor, IsDaemon):
         config["TriggerTimeout"] = self._config["trigger_time_out"]
         config["TriggerHoldoff"] = self._config["trigger_hold_off"]
         config["ExtClk"] = int(self._config["ext_clk"])
-        config["TimeStampConfig"] = 0 # self._config["time_stamp_mode"]
+        config["TimeStampConfig"] = 0  # self._config["time_stamp_mode"]
         # config["TimeStampClock"] = self._config["time_stamp_clock"]
         # from state
         config["SegmentCount"] = self._state["segment_count"]
