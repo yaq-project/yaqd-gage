@@ -154,6 +154,9 @@ class CompuScope(HasMeasureTrigger, IsSensor, IsDaemon):
             out[f"channel{channel_index+1}"] *= -1
         return out
 
+    def close(self):
+        self._pg.free_system()
+
     def set_segment_count(self, count: int) -> None:
         assert count <= self._max_segment_count
         self._state["segment_count"] = count
