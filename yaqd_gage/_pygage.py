@@ -115,9 +115,9 @@ class PyGage(object):
     @property
     def interface(self):
         if sys.maxsize > 2**32:
-            import PyGage3_64 as pg  # type: ignore
+            from . import PyGage3_64 as pg  # type: ignore
         else:
-            import PyGage3_32 as pg  # type: ignore
+            from . import PyGage3_32 as pg  # type: ignore
         return pg
 
     @property

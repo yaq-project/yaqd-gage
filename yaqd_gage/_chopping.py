@@ -50,11 +50,11 @@ class CompuScope(HasMeasureTrigger, IsSensor, IsDaemon):
         config["SegmentSize"] = self._config["segment_size"]
         config["TriggerDelay"] = self._config["trigger_delay"]
         config["SegmentCount"] = self._state["segment_count"]
-        config["TriggerTimeOut"] = self._config["trigger_time_out"]
-        config["TriggerHoldOff"] = self._config["trigger_hold_off"]
+        config["TriggerTimeout"] = self._config["trigger_time_out"]
+        config["TriggerHoldoff"] = self._config["trigger_hold_off"]
         config["ExtClk"] = int(self._config["ext_clk"])
-        config["TimeStampMode"] = self._config["time_stamp_mode"]
-        config["TimeStampClock"] = self._config["time_stamp_clock"]
+        config["TimeStampConfig"] = 0 # self._config["time_stamp_mode"]
+        # config["TimeStampClock"] = self._config["time_stamp_clock"]
         # from state
         config["SegmentCount"] = self._state["segment_count"]
         self._pg.set_acquisition_config(config)
@@ -66,8 +66,8 @@ class CompuScope(HasMeasureTrigger, IsSensor, IsDaemon):
             couplings = {"DC": 1, "AC": 2}
             config["Coupling"] = couplings[channel["coupling"]]
             config["Impedance"] = impedences[channel["impedance"]]
-            config["DiffInput"] = int(channel["diff_input"])
-            config["DirectADC"] = int(channel["direct_adc"])
+            # config["DiffInput"] = int(channel["diff_input"])
+            # config["DirectADC"] = int(channel["direct_adc"])
             config["Filter"] = int(channel["filter"])
             config["DcOffset"] = channel["dc_offset"]
             self._pg.set_channel_config(channel_index + 1, config)
@@ -75,10 +75,11 @@ class CompuScope(HasMeasureTrigger, IsSensor, IsDaemon):
         for trigger_index, trigger in enumerate(self._config["triggers"]):
             config = {}
             config["Condition"] = trigger["condition"]
-            config["Level"] = trigger["level"]
+            config["Level"] = int(trigger["level"])
             config["Source"] = trigger["source"]
-            config["InputRange"] = trigger["range"]
-            config["Impedance"] = impedences[channel["impedance"]]
+            config["ExtRange"] = trigger["range"]
+            config["ExtImpedance"] = impedences[channel["impedance"]]
+            config["ExtCoupling"] = couplings[channel["coupling"]]
             config["Relation"] = 0
             self._pg.set_trigger_config(trigger_index + 1, config)
         # finish
