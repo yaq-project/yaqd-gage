@@ -56,6 +56,19 @@ def compuscope_error_handling(func):
     return inner
 
 
+def to_voltage(adc, repetitions, offset, dc_offset, full_range, resolution):
+    """
+    converts buffer to voltage values as specified from SDK docs:
+
+    voltage[mV] = (offset - adc_code)/resolution * full_scale_voltage / 2 + dc_offset
+    """
+    adc *= -1 / repetitions
+    adc += offset
+    adc *= full_range / 2000 / resolution
+    adc += dc_offset
+    return adc
+
+
 class PyGage(object):
     def __init__(self):
         self.initialize()
