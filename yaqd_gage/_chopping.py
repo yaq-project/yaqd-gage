@@ -42,6 +42,8 @@ class CompuScope(HasMeasureTrigger, IsSensor, IsDaemon):
 
     @uses_pygage
     def _config_pygage(self):
+        acq = self._pg.get_acquisition_config()
+        self.logger.info(acq)
         # acqusition config
         config = {}
         config["Mode"] = self._config["mode"]
@@ -56,11 +58,16 @@ class CompuScope(HasMeasureTrigger, IsSensor, IsDaemon):
         config["TimeStampConfig"] = 0  # self._config["time_stamp_mode"]
         # config["TimeStampClock"] = self._config["time_stamp_clock"]
         # from state
+        for k in config:
+            self.logger.info(f"{k}: {acq.get(k)} | {config.get(k)}")
         config["SegmentCount"] = self._state["segment_count"]
         self._pg.set_acquisition_config(config)
         self._pg.set_multiple_rec_average_count(self._state["record_count"])
         # channel config
         for channel_index, channel in enumerate(self._config["channels"]):
+            self.logger.info(f"{channel_index=}")
+            # cfg = self._pg.get_channel_config(channel_index)
+            # self.logger.info(cfg)
             config = {}
             config["InputRange"] = channel["range"]
             couplings = {"DC": 1, "AC": 2}
@@ -73,6 +80,8 @@ class CompuScope(HasMeasureTrigger, IsSensor, IsDaemon):
             self._pg.set_channel_config(channel_index + 1, config)
         # trigger config
         for trigger_index, trigger in enumerate(self._config["triggers"]):
+            tcfg = self._pg.get_trigger_config(-1)
+            self.logger.info(tcfg)
             config = {}
             config["Condition"] = trigger["condition"]
             config["Level"] = int(trigger["level"])
@@ -81,6 +90,9 @@ class CompuScope(HasMeasureTrigger, IsSensor, IsDaemon):
             config["ExtImpedance"] = impedences[channel["impedance"]]
             config["ExtCoupling"] = couplings[channel["coupling"]]
             config["Relation"] = 0
+            for k in tcfg:
+                self.logger.info(f"{k}: {tcfg.get(k)} | {config.get(k)}")
+
             self._pg.set_trigger_config(trigger_index + 1, config)
         # finish
         self._pg.commit()
@@ -113,15 +125,16 @@ class CompuScope(HasMeasureTrigger, IsSensor, IsDaemon):
         self._pg.commit()
         self._max_segment_count = self._pg.max_segment_count
         # start capture
+        before = time.time()
         self._pg.start_capture()
         # wait for capture to complete
-        before = time.time()
         while True:
             code = self._pg.get_status()
             if acq_status_codes[code] == "ACQ_STATUS_READY":
                 break
             await asyncio.sleep(0)
         # read out
+        after = time.time()
         segments = {}
         segment_count = self._state["segment_count"]
         record_count = self._state["record_count"]
@@ -182,6 +195,10 @@ class CompuScope(HasMeasureTrigger, IsSensor, IsDaemon):
         out["ai0_diff_abcd"] = out["ai0_a"] - out["ai0_b"] + out["ai0_c"] - out["ai0_d"]
         out["ai0_diff_ab"] = out["ai0_b"] - out["ai0_a"]
         out["ai0_diff_ad"] = out["ai0_d"] - out["ai0_a"]
+        finished = time.time()
+        self.logger.info(f"measurement: {after-before} sec")
+        self.logger.info(f"maths: {finished-after} sec")
+
         return out
 
     async def _process_single_channel(
