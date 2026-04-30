@@ -362,7 +362,7 @@
             "units_getter": null
         },
         "record_count": {
-            "control_kind": "normal",
+            "control_kind": "hinted",
             "dynamic": true,
             "getter": "get_record_count",
             "limits_getter": null,
@@ -373,7 +373,7 @@
             "units_getter": null
         },
         "segment_count": {
-            "control_kind": "normal",
+            "control_kind": "hinted",
             "dynamic": true,
             "getter": "get_segment_count",
             "limits_getter": "get_segment_count_limits",
@@ -525,10 +525,10 @@
                     "type": "int"
                 },
                 {
-                    "default": 0.0,
+                    "default": 0,
                     "doc": "Trigger level as a perentage of the input range of the trigger source (half the full scale input range). For example, in the 2000 mV range at 0 DC offset, 50 would be positive 50% of 1 Volt, or 500 millivolts.",
                     "name": "level",
-                    "type": "float"
+                    "type": "int"
                 },
                 {
                     "doc": "Trigger source. Refer to the CompuScope documentation for valid values.",
