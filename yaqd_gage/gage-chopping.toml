@@ -48,7 +48,7 @@ type = "record"
 name = "trigger"
 fields = [{"name"="range", "type"="int", "doc"="Full input range in millivolts."},
           {"name"="condition", "type"="int", "doc"="Trigger condition. Refer to the CompuScope documentation for valid values."},
-          {"name"="level", "type"="float", "default"=0.0, "doc"="Trigger level as a perentage of the input range of the trigger source (half the full scale input range). For example, in the 2000 mV range at 0 DC offset, 50 would be positive 50% of 1 Volt, or 500 millivolts."},
+          {"name"="level", "type"="int", "default"=0, "doc"="Trigger level as a perentage of the input range of the trigger source (half the full scale input range). For example, in the 2000 mV range at 0 DC offset, 50 would be positive 50% of 1 Volt, or 500 millivolts."},
 	  {"name"="source", "type"="int", "doc"="Trigger source. Refer to the CompuScope documentation for valid values."},
 	  {"name"="coupling", "type"="coupling_mode"},
 	  {"name"="impedance", "type"="impedance_mode"}]
@@ -198,7 +198,7 @@ record_kind = "metadata"
 getter = "get_record_count"
 setter = "set_record_count"
 type = "int"
-control_kind = "normal"
+control_kind = "hinted"
 record_kind = "metadata"
 
 [properties.segment_count]
@@ -206,6 +206,6 @@ getter = "get_segment_count"
 setter = "set_segment_count"
 limits_getter = "get_segment_count_limits"
 type = "int"
-control_kind = "normal"
+control_kind = "hinted"
 record_kind = "metadata"
 
