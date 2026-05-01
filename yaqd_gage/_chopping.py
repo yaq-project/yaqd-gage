@@ -10,7 +10,7 @@ import numpy as np  # type: ignore
 from yaqd_core import HasMeasureTrigger, IsSensor, IsDaemon
 
 from ._constants import acq_status_codes, transfer_modes
-from ._pygage import PyGage
+from ._pygage import PyGage, to_voltage
 
 
 impedences = {"fifty": 50, "onemeg": 1_000_000}
@@ -196,13 +196,14 @@ class CompuScope(HasMeasureTrigger, IsSensor, IsDaemon):
                 transfer_mode=transfer_modes["data_32"],
             )[0]
             seg = np.array(seg, dtype=float)
-            seg /= 2**8  # THIS IS AN EXTRA FACTOR THAT I DO NOT UNDERSTAND!!!  -Blaise
-            seg /= record_count  # firmware sums accoss all records internally
-            seg *= -1
-            seg += system_info["SampleOffset"]
-            seg /= system_info["SampleResolution"]
-            seg *= 2 * channel_info["InputRange"] / 1000
-            seg += channel_info["DcOffset"]
+            seg = to_voltage(
+                seg,
+                record_count,
+                system_info["SampleOffset"],
+                channel_info["DcOffset"],
+                channel_info["InputRange"],
+                system_info["SampleResolution"],
+            )
             self._samples[f"ai{channel_index}"] = seg
 
             # signal
