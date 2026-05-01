@@ -51,3 +51,6 @@ coverage.xml
 
 # vim
 *.sw?
+
+# vscode
+/.vscode

@@ -11,21 +11,19 @@ authors = [
 maintainers = [
   {name="yaq Developers"},
 ]
-requires-python = ">=3.7"
-dependencies = ["yaqd-core>=2020.06.3",
-            "numpy",
-            "toml>=0.10.2",
-            "yaq-traits",
-            "qtypes",
-            "toml",
-            ]
+requires-python = ">=3.8"
+dependencies = [
+  "yaqd-core",
+  "numpy",
+  "toml",
+]
 classifiers = [
     "Development Status :: 2 - Pre-Alpha",
     "Intended Audience :: Science/Research",
     "Natural Language :: English",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.7",
-    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
     "Topic :: Scientific/Engineering",
 ]
 license = "LGPL-3.0-or-later"
@@ -52,7 +50,7 @@ gage-samples = "yaqd_gage.gui._samples_gui:SamplesGUI"
 
 [tool.black]
 line-length = 99
-target-version = ['py37', 'py38']
+target-version = ['py310', 'py311']
 include = '\.pyi?$'
 exclude = '''
 /(

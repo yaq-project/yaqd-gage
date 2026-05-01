@@ -1,11 +1,61 @@
 """Wrapper to normalize PyGage support."""
 
 import sys
+from functools import wraps
 
 import numpy as np  # type: ignore
 
 from ._exceptions import CompuScopeException
 from ._constants import transfer_modes
+
+
+def uses_pygage(func):
+    """decorator for pygage context management"""
+
+    @wraps(func)
+    def wrapper(self, *args, **kwargs):
+        pg: PyGage = getattr(self, "_pg", None)
+        try:
+            return func(self, *args, **kwargs)
+        except Exception as e:
+            self.logger.exception(f"error in {func.__name__}")
+            code = pg.interface.FreeSystem(pg.handle)
+            # ignore errors, which are probably from closing when already closed
+            if isinstance(code, int) and code < 0:
+                self.logger.error(f"{func.__name__} : FreeSystem : code={code}")
+            raise e
+
+    return wrapper
+
+
+def async_uses_pygage(func):
+    """decorator for async pygage context management"""
+
+    @wraps(func)
+    async def wrapper(self, *args, **kwargs):
+        pg: PyGage = getattr(self, "_pg", None)
+        try:
+            return await func(self, *args, **kwargs)
+        except Exception as e:
+            self.logger.exception(f"error in {func.__name__}")
+            code = pg.interface.FreeSystem(pg.handle)
+            if code != -6:  # ignore -6, which means the system is already freed
+                self.logger.error(f"{func.__name__} : FreeSystem : code={code}")
+                raise e
+
+    return wrapper
+
+
+def compuscope_error_handling(func):
+    """Decorator to raise Python exception when appropriate."""
+
+    def inner(*args, **kwargs):
+        response = func(*args, **kwargs)
+        if isinstance(response, int) and response < 0:
+            raise CompuScopeException(response)
+        return response
+
+    return inner
 
 
 def to_voltage(adc, repetitions, offset, dc_offset, full_range, resolution):
@@ -21,18 +71,6 @@ def to_voltage(adc, repetitions, offset, dc_offset, full_range, resolution):
     return adc
 
 
-def compuscope_error_handling(func):
-    """Decorator to raise Python exception when appropriate."""
-
-    def inner(*args, **kwargs):
-        response = func(*args, **kwargs)
-        if isinstance(response, int) and response < 0:
-            raise CompuScopeException(response)
-        return response
-
-    return inner
-
-
 class PyGage(object):
 
     def __init__(self):
@@ -40,9 +78,19 @@ class PyGage(object):
         self.handle = self.get_system()
 
     @compuscope_error_handling
+    def abort_capture(self):
+        """Aborts an acquisition or transfer on the CompuScope system."""
+        return self.interface.AbortCapture(self.handle)
+
+    @compuscope_error_handling
     def commit(self):
         """Commit any configuration changes to device."""
         return self.interface.Commit(self.handle)
+
+    @compuscope_error_handling
+    def free_system(self):
+        """Frees the system associated with the handle"""
+        return self.interface.FreeSystem(self.handle)
 
     @compuscope_error_handling
     def get_acquisition_config(self):
@@ -83,9 +131,9 @@ class PyGage(object):
     @property
     def interface(self) -> object:
         if sys.maxsize > 2**32:
-            import PyGage3_64 as pg  # type: ignore
+            from . import PyGage3_64 as pg  # type: ignore
         else:
-            import PyGage3_32 as pg  # type: ignore
+            from . import PyGage3_32 as pg  # type: ignore
         return pg
 
     @property
