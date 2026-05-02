@@ -36,6 +36,7 @@ Issues = "https://github.com/yaq-project/yaqd-gage/issues"
 
 [project.optional-dependencies]
 dev = ["black", "pre-commit"]
+gui = ["qtypes", "yaqc"]
 
 [project.scripts]
 yaqd-gage-compuscope = "yaqd_gage._compuscope:CompuScope.main"

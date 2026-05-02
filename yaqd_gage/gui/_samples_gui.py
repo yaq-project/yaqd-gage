@@ -9,8 +9,6 @@ import qtypes  # type: ignore
 import yaqc_qtpy  # type: ignore
 from yaqc_qtpy import _plot, qtype_items  # noqa
 
-import yaq_traits  # type: ignore
-
 
 class SamplesGUI(QtWidgets.QSplitter):
     def __init__(self, qclient: yaqc_qtpy.QClient):
