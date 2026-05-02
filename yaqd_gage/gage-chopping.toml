@@ -62,7 +62,7 @@ fields = [{"name"="min", "type"="double"},
 [config]
 
 [config.mode]
-doc = "Sets the operating mode of the CompuScope system. Refer to the CompuScope documentation for valid values. Default is 1073741825 for FirmWare Averaging"
+doc = "Sets the operating mode of the CompuScope system. Refer to the CompuScope documentation for valid values. Default is 1073741828 for FirmWare Averaging and four channels."
 type = "int"
 default = 0x40000004
 
@@ -162,7 +162,7 @@ doc = "Get a dictionary of 1D arrays of measured segments."
 response = {"type"="map", "values"="ndarray"}
 
 [messages.get_record_count]
-doc = "Get record count."
+doc = "Get the number of acquisitions that are averaged on-board via firmware."
 response = "int"
 
 [messages.get_segment_count]
