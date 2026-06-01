@@ -217,7 +217,7 @@ request = [{"name"="index", "type"="int"}]
 
 [messages.get_photon_index_limits]
 doc = ""
-response = {"type"="list", "items"="int"}
+response = {"type"="array", "items"="int"}
 
 
 [properties]
