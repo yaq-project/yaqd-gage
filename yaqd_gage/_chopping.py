@@ -25,18 +25,21 @@ class CompuScope(HasMeasureTrigger, IsSensor, IsDaemon):
         self._channel_names = []
         self._max_segment_count = None  # redefined in _config_pygage
         self._config_pygage()
-        self._channel_names.append("ai0")
         self._channel_names.append("ai1")
         self._channel_names.append("ai2")
         self._channel_names.append("ai3")
-        self._channel_names.append("ai0_a")
-        self._channel_names.append("ai0_b")
-        self._channel_names.append("ai0_c")
-        self._channel_names.append("ai0_d")
-        self._channel_names.append("ai0_diff_abcd")
-        self._channel_names.append("ai0_diff_ab")
-        self._channel_names.append("ai0_diff_ad")
-        self._channel_units = {k: "V" for k in self._channel_names}
+        for pre in "ap":
+            self._channel_names += [
+                f"{pre}i0",
+                f"{pre}i0_a",
+                f"{pre}i0_b",
+                f"{pre}i0_c",
+                f"{pre}i0_d",
+                f"{pre}i0_diff_abcd",
+                f"{pre}i0_diff_ab",
+                f"{pre}i0_diff_ad",
+            ]
+        self._channel_units = {k: "V" if k.startswith("a") else None for k in self._channel_names}
         self._samples: Dict[str, np.ndarray] = dict()
         self._segments: Dict[str, np.ndarray] = dict()
 
