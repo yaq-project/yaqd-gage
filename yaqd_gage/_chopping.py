@@ -187,7 +187,7 @@ class CompuScope(HasMeasureTrigger, IsSensor, IsDaemon):
         for phase in "abcd":
             if regions[phase]:
                 valid = np.r_[tuple(regions[phase])]
-                out[f"pi0_{phase}"] = np.sum(counts[valid]])
+                out[f"pi0_{phase}"] = np.sum(counts[valid])
                 out[f"ai0_{phase}"] = np.mean(segments["ai0"][valid])
             else:
                 out[f"pi0_{phase}"] = out[f"ai0_{phase}"] = np.nan
