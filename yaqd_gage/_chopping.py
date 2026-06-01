@@ -176,11 +176,11 @@ class CompuScope(HasMeasureTrigger, IsSensor, IsDaemon):
                         self._segments["regions"][sl] = k
                         start = None
             await asyncio.sleep(0)
-        # segments: dict with keys of channel, values of 2D array [shot, scope trace points]
+        # segments: dict with keys of channel, values are 1D array of 1D arrays
         # count photon events
         # properties: photon_index, photon_threshold (perhaps dictionary for each channel?)
-        counts = segments["ai0"][:, photon_index] > photon_threshold
-        out["pi0"] = sum(counts)
+        counts = np.array([shot > photon_threshold for shot in segments["ai0"]], dtype=bool)
+        out["pi0"] = counts.sum()
         # take means
         out["ai0"] = np.mean(segments["ai0"])
         out["ai1"] = np.mean(segments["ai1"])
@@ -201,7 +201,7 @@ class CompuScope(HasMeasureTrigger, IsSensor, IsDaemon):
             out[f"{key}_diff_abcd"] = (
                 out[f"{key}_a"] - out[f"{key}_b"] + out[f"{key}_c"] - out[f"{key}_d"]
             )
-            out["pi0_diff_ab"] = out[f"{key}_b"] - out[f"{key}_a"]
+            out[f"{key}_diff_ab"] = out[f"{key}_b"] - out[f"{key}_a"]
             out[f"{key}_diff_ad"] = out[f"{key}_d"] - out[f"{key}_a"]
         finished = time.time()
         self.logger.info(f"measurement: {after-before} sec")
