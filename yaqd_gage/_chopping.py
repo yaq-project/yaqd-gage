@@ -272,19 +272,10 @@ class CompuScope(HasMeasureTrigger, IsSensor, IsDaemon):
         self._state["segment_count"] = count
 
     def set_photon_threshold(self, threshold) -> None:
-        self._state["photon_threhsold"] = threshold
-
-    def set_photon_index(self, index) -> None:
-        self._state["photon_index"] = index
+        self._state["photon_threshold"] = threshold
 
     def get_photon_threshold(self) -> float:
         return self._state["photon_threshold"]
-
-    def get_photon_index(self) -> int:
-        return self._state["photon_index"]
-
-    def get_photon_index_limits(self) -> list[int]:
-        return [0, self._config["depth"]]
 
     def get_photon_threshold_units(self) -> str:
         return "V"

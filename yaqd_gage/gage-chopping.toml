@@ -195,7 +195,7 @@ request = [{"name"="count", "type"="int"}]
 doc = "Set record count."
 request = [{"name"="count", "type"="int"}]
 
-[messages.get_photon_theshold]
+[messages.get_photon_threshold]
 doc = ""
 response = "float"
 
@@ -206,18 +206,6 @@ request = [{"name"="threshold", "type"="float"}]
 [messages.get_photon_threshold_units]
 doc = ""
 response = "string"
-
-[messages.get_photon_index]
-doc = ""
-response = "int"
-
-[messages.set_photon_index]
-doc = ""
-request = [{"name"="index", "type"="int"}]
-
-[messages.get_photon_index_limits]
-doc = ""
-response = {"type"="array", "items"="int"}
 
 
 [properties]
@@ -242,14 +230,6 @@ setter = "set_segment_count"
 limits_getter = "get_segment_count_limits"
 type = "int"
 control_kind = "hinted"
-record_kind = "metadata"
-
-[properties.photon_index]
-getter = "get_photon_index"
-setter = "set_photon_index"
-limits_getter = "get_photon_index_limits"
-type = "int"
-control_kind = "normal"
 record_kind = "metadata"
 
 [properties.photon_threshold]
