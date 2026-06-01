@@ -193,7 +193,9 @@ class CompuScope(HasMeasureTrigger, IsSensor, IsDaemon):
                 out[f"pi0_{phase}"] = out[f"ai0_{phase}"] = np.nan
 
         for key in ["pi0", "ai0"]:
-            out[f"{key}_diff_abcd"] = out[f"{key}_a"] - out[f"{key}_b"] + out[f"{key}_c"] - out[f"{key}_d"]
+            out[f"{key}_diff_abcd"] = (
+                out[f"{key}_a"] - out[f"{key}_b"] + out[f"{key}_c"] - out[f"{key}_d"]
+            )
             out["pi0_diff_ab"] = out[f"{key}_b"] - out[f"{key}_a"]
             out[f"{key}_diff_ad"] = out[f"{key}_d"] - out[f"{key}_a"]
         finished = time.time()
@@ -269,7 +271,7 @@ class CompuScope(HasMeasureTrigger, IsSensor, IsDaemon):
 
     def set_photon_index(self, index) -> None:
         self._state["photon_index"] = index
-    
+
     def get_photon_threshold(self) -> float:
         return self._state["photon_threshold"]
 
@@ -281,5 +283,3 @@ class CompuScope(HasMeasureTrigger, IsSensor, IsDaemon):
 
     def get_photon_threshold_units(self) -> str:
         return "V"
-
-
