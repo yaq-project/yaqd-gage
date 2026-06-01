@@ -147,6 +147,16 @@ doc = "Width of edges in segment count."
 type = "int"
 default = 1
 
+[state.photon_threshold]
+doc = "Voltage at which photon events are counted."
+type = "float"
+default = 1.0
+
+[state.photon_index]
+doc = "sample index at which to measure photon events"
+type = "int"
+default = 1
+
 [messages]
 
 [messages.get_edge_width_count]
@@ -185,6 +195,31 @@ request = [{"name"="count", "type"="int"}]
 doc = "Set record count."
 request = [{"name"="count", "type"="int"}]
 
+[messages.get_photon_theshold]
+doc = ""
+response = "float"
+
+[messages.set_photon_threshold]
+doc = ""
+request = [{"name"="threshold", "type"="float"}]
+
+[messages.get_photon_threshold_units]
+doc = ""
+response = "string"
+
+[messages.get_photon_index]
+doc = ""
+response = "int"
+
+[messages.set_photon_index]
+doc = ""
+request = [{"name"="index", "type"="int"}]
+
+[messages.get_photon_index_limits]
+doc = ""
+response = {"type"="list", "items"="int"}
+
+
 [properties]
 
 [properties.edge_width_count]
@@ -209,3 +244,18 @@ type = "int"
 control_kind = "hinted"
 record_kind = "metadata"
 
+[properties.photon_index]
+getter = "get_photon_index"
+setter = "set_photon_index"
+limits_getter = "get_photon_index_limits"
+type = "int"
+control_kind = "normal"
+record_kind = "metadata"
+
+[properties.photon_threshold]
+getter = "get_photon_threshold"
+setter = "set_photon_theshold"
+units_getter = "get_photon_threshold_units"
+type = "float"
+control_kind = "normal"
+record_kind = "metadata"

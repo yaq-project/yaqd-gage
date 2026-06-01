@@ -171,30 +171,31 @@ class CompuScope(HasMeasureTrigger, IsSensor, IsDaemon):
                         self._segments["regions"][sl] = k
                         start = None
             await asyncio.sleep(0)
+        # segments: dict with keys of channel, values of 2D array [shot, scope trace points]
+        # count photon events
+        # properties: photon_index, photon_threshold (perhaps dictionary for each channel?)
+        counts = segments["ai0"][:, self.photon_index] > self.photon_threshold
+        out["pi0"] = sum(counts)
         # take means
         out["ai0"] = np.mean(segments["ai0"])
         out["ai1"] = np.mean(segments["ai1"])
         out["ai2"] = np.mean(segments["ai2"])
         out["ai3"] = np.mean(segments["ai3"])
-        if regions["a"]:
-            out["ai0_a"] = np.mean(segments["ai0"][np.r_[tuple(regions["a"])]])
-        else:
-            out["ai0_a"] = np.nan
-        if regions["b"]:
-            out["ai0_b"] = np.mean(segments["ai0"][np.r_[tuple(regions["b"])]])
-        else:
-            out["ai0_b"] = np.nan
-        if regions["c"]:
-            out["ai0_c"] = np.mean(segments["ai0"][np.r_[tuple(regions["c"])]])
-        else:
-            out["ai0_c"] = np.nan
-        if regions["d"]:
-            out["ai0_d"] = np.mean(segments["ai0"][np.r_[tuple(regions["d"])]])
-        else:
-            out["ai0_d"] = np.nan
-        out["ai0_diff_abcd"] = out["ai0_a"] - out["ai0_b"] + out["ai0_c"] - out["ai0_d"]
-        out["ai0_diff_ab"] = out["ai0_b"] - out["ai0_a"]
-        out["ai0_diff_ad"] = out["ai0_d"] - out["ai0_a"]
+
+        # ai0-derived channels
+        # TODO: remove hard-code ai0, put in config
+        for phase in "abcd":
+            if regions[phase]:
+                valid = np.r_[tuple(regions[phase])]
+                out[f"pi0_{phase}"] = np.sum(counts[valid]])
+                out[f"ai0_{phase}"] = np.mean(segments["ai0"][valid])
+            else:
+                out[f"pi0_{phase}"] = out[f"ai0_{phase}"] = np.nan
+
+        for key in ["pi0", "ai0"]:
+            out[f"{key}_diff_abcd"] = out[f"{key}_a"] - out[f"{key}_b"] + out[f"{key}_c"] - out[f"{key}_d"]
+            out["pi0_diff_ab"] = out[f"{key}_b"] - out[f"{key}_a"]
+            out[f"{key}_diff_ad"] = out[f"{key}_d"] - out[f"{key}_a"]
         finished = time.time()
         self.logger.info(f"measurement: {after-before} sec")
         self.logger.info(f"maths: {finished-after} sec")
@@ -262,3 +263,23 @@ class CompuScope(HasMeasureTrigger, IsSensor, IsDaemon):
 
     def set_segment_count(self, count: int) -> None:
         self._state["segment_count"] = count
+
+    def set_photon_threshold(self, threshold) -> None:
+        self._state["photon_threhsold"] = threshold
+
+    def set_photon_index(self, index) -> None:
+        self._state["photon_index"] = index
+    
+    def get_photon_threshold(self) -> float:
+        return self._state["photon_threshold"]
+
+    def get_photon_index(self) -> int:
+        return self._state["photon_index"]
+
+    def get_photon_index_limits(self) -> list[int]:
+        return [0, self._config["depth"]]
+
+    def get_photon_threshold_units(self) -> str:
+        return "V"
+
+
