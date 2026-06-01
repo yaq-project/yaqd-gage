@@ -388,7 +388,7 @@
             "limits_getter": null,
             "options_getter": null,
             "record_kind": "metadata",
-            "setter": "set_photon_theshold",
+            "setter": "set_photon_threshold",
             "type": "float",
             "units_getter": "get_photon_threshold_units"
         },
@@ -421,11 +421,6 @@
         "edge_width_count": {
             "default": 1,
             "doc": "Width of edges in segment count.",
-            "type": "int"
-        },
-        "photon_index": {
-            "default": 1,
-            "doc": "sample index at which to measure photon events",
             "type": "int"
         },
         "photon_threshold": {
