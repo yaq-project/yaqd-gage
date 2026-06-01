@@ -252,6 +252,29 @@
                 "type": "int"
             }
         },
+        "get_photon_index": {
+            "doc": "",
+            "request": [],
+            "response": "int"
+        },
+        "get_photon_index_limits": {
+            "doc": "",
+            "request": [],
+            "response": {
+                "items": "int",
+                "type": "array"
+            }
+        },
+        "get_photon_theshold": {
+            "doc": "",
+            "request": [],
+            "response": "float"
+        },
+        "get_photon_threshold_units": {
+            "doc": "",
+            "request": [],
+            "response": "string"
+        },
         "get_record_count": {
             "doc": "Get the number of acquisitions that are averaged on-board via firmware.",
             "request": [],
@@ -310,6 +333,26 @@
             ],
             "response": "null"
         },
+        "set_photon_index": {
+            "doc": "",
+            "request": [
+                {
+                    "name": "index",
+                    "type": "int"
+                }
+            ],
+            "response": "null"
+        },
+        "set_photon_threshold": {
+            "doc": "",
+            "request": [
+                {
+                    "name": "threshold",
+                    "type": "float"
+                }
+            ],
+            "response": "null"
+        },
         "set_record_count": {
             "doc": "Set record count.",
             "request": [
@@ -361,6 +404,28 @@
             "type": "int",
             "units_getter": null
         },
+        "photon_index": {
+            "control_kind": "normal",
+            "dynamic": true,
+            "getter": "get_photon_index",
+            "limits_getter": "get_photon_index_limits",
+            "options_getter": null,
+            "record_kind": "metadata",
+            "setter": "set_photon_index",
+            "type": "int",
+            "units_getter": null
+        },
+        "photon_threshold": {
+            "control_kind": "normal",
+            "dynamic": true,
+            "getter": "get_photon_threshold",
+            "limits_getter": null,
+            "options_getter": null,
+            "record_kind": "metadata",
+            "setter": "set_photon_theshold",
+            "type": "float",
+            "units_getter": "get_photon_threshold_units"
+        },
         "record_count": {
             "control_kind": "hinted",
             "dynamic": true,
@@ -391,6 +456,16 @@
             "default": 1,
             "doc": "Width of edges in segment count.",
             "type": "int"
+        },
+        "photon_index": {
+            "default": 1,
+            "doc": "sample index at which to measure photon events",
+            "type": "int"
+        },
+        "photon_threshold": {
+            "default": 1.0,
+            "doc": "Voltage at which photon events are counted.",
+            "type": "float"
         },
         "record_count": {
             "default": 32,
