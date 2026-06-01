@@ -120,6 +120,8 @@ class CompuScope(HasMeasureTrigger, IsSensor, IsDaemon):
     async def _measure(self):
         out = dict()
         # apply state variables
+        photon_index = self._state["photon_index"]
+        photon_threshold = self._state["photon_threshold"]
         self._pg.set_acquisition_config({"SegmentCount": self._state["segment_count"]})
         self._pg.set_multiple_rec_average_count(self._state["record_count"])
         self._pg.commit()
@@ -174,7 +176,7 @@ class CompuScope(HasMeasureTrigger, IsSensor, IsDaemon):
         # segments: dict with keys of channel, values of 2D array [shot, scope trace points]
         # count photon events
         # properties: photon_index, photon_threshold (perhaps dictionary for each channel?)
-        counts = segments["ai0"][:, self.photon_index] > self.photon_threshold
+        counts = segments["ai0"][:, photon_index] > photon_threshold
         out["pi0"] = sum(counts)
         # take means
         out["ai0"] = np.mean(segments["ai0"])
