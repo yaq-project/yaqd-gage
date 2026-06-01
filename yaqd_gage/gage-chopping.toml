@@ -152,11 +152,6 @@ doc = "Voltage at which photon events are counted."
 type = "float"
 default = 1.0
 
-[state.photon_index]
-doc = "sample index at which to measure photon events"
-type = "int"
-default = 1
-
 [messages]
 
 [messages.get_edge_width_count]
@@ -234,7 +229,7 @@ record_kind = "metadata"
 
 [properties.photon_threshold]
 getter = "get_photon_threshold"
-setter = "set_photon_theshold"
+setter = "set_photon_threshold"
 units_getter = "get_photon_threshold_units"
 type = "float"
 control_kind = "normal"
