@@ -2,8 +2,10 @@
     "config": {
         "channels": {
             "default": [],
-            "items": "channel",
-            "type": "array"
+            "type": {
+                "items": "channel",
+                "type": "array"
+            }
         },
         "depth": {
             "default": 240,
@@ -88,8 +90,10 @@
         },
         "segment_bins": {
             "default": {},
-            "type": "map",
-            "values": "voltage_range"
+            "type": {
+                "type": "map",
+                "values": "voltage_range"
+            }
         },
         "segment_size": {
             "default": 240,
@@ -108,22 +112,26 @@
         "time_stamp_clock": {
             "default": "Fixed",
             "doc": "The time-stamping clock may operate in one of two modes. In fixed mode, the on-board oscillator will be used as the counter source. In sample mode, a frequency derived from the sampling clock will be used as the counter source.",
-            "name": "time_stamp_clock_mode",
-            "symbols": [
-                "Fixed",
-                "Sample"
-            ],
-            "type": "enum"
+            "type": {
+                "name": "time_stamp_clock_mode",
+                "symbols": [
+                    "Fixed",
+                    "Sample"
+                ],
+                "type": "enum"
+            }
         },
         "time_stamp_mode": {
             "default": "Free",
             "doc": "The time-stamping counter may be reset upon the start of each acquisition or left free-running.",
-            "name": "time_stampmode",
-            "symbols": [
-                "Free",
-                "Reset"
-            ],
-            "type": "enum"
+            "type": {
+                "name": "time_stampmode",
+                "symbols": [
+                    "Free",
+                    "Reset"
+                ],
+                "type": "enum"
+            }
         },
         "trigger_delay": {
             "default": 0,
@@ -142,8 +150,10 @@
         },
         "triggers": {
             "default": [],
-            "items": "trigger",
-            "type": "array"
+            "type": {
+                "items": "trigger",
+                "type": "array"
+            }
         }
     },
     "doc": "yaq daemon supporting GaGe CompuScope Digitizer Models.\nFor chopping.\n",
