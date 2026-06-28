@@ -62,7 +62,7 @@
         },
         "mode": {
             "default": 1073741828,
-            "doc": "Sets the operating mode of the CompuScope system. Refer to the CompuScope documentation for valid values. Default is 1073741825 for FirmWare Averaging",
+            "doc": "Sets the operating mode of the CompuScope system. Refer to the CompuScope documentation for valid values. Default is 1073741828 for FirmWare Averaging and four channels.",
             "type": "int"
         },
         "model": {
@@ -252,8 +252,18 @@
                 "type": "int"
             }
         },
+        "get_photon_threshold": {
+            "doc": "",
+            "request": [],
+            "response": "float"
+        },
+        "get_photon_threshold_units": {
+            "doc": "",
+            "request": [],
+            "response": "string"
+        },
         "get_record_count": {
-            "doc": "Get record count.",
+            "doc": "Get the number of acquisitions that are averaged on-board via firmware.",
             "request": [],
             "response": "int"
         },
@@ -310,6 +320,16 @@
             ],
             "response": "null"
         },
+        "set_photon_threshold": {
+            "doc": "",
+            "request": [
+                {
+                    "name": "threshold",
+                    "type": "float"
+                }
+            ],
+            "response": "null"
+        },
         "set_record_count": {
             "doc": "Set record count.",
             "request": [
@@ -361,8 +381,19 @@
             "type": "int",
             "units_getter": null
         },
-        "record_count": {
+        "photon_threshold": {
             "control_kind": "normal",
+            "dynamic": true,
+            "getter": "get_photon_threshold",
+            "limits_getter": null,
+            "options_getter": null,
+            "record_kind": "metadata",
+            "setter": "set_photon_threshold",
+            "type": "float",
+            "units_getter": "get_photon_threshold_units"
+        },
+        "record_count": {
+            "control_kind": "hinted",
             "dynamic": true,
             "getter": "get_record_count",
             "limits_getter": null,
@@ -373,7 +404,7 @@
             "units_getter": null
         },
         "segment_count": {
-            "control_kind": "normal",
+            "control_kind": "hinted",
             "dynamic": true,
             "getter": "get_segment_count",
             "limits_getter": "get_segment_count_limits",
@@ -391,6 +422,11 @@
             "default": 1,
             "doc": "Width of edges in segment count.",
             "type": "int"
+        },
+        "photon_threshold": {
+            "default": 1.0,
+            "doc": "Voltage at which photon events are counted.",
+            "type": "float"
         },
         "record_count": {
             "default": 32,
@@ -525,10 +561,10 @@
                     "type": "int"
                 },
                 {
-                    "default": 0.0,
+                    "default": 0,
                     "doc": "Trigger level as a perentage of the input range of the trigger source (half the full scale input range). For example, in the 2000 mV range at 0 DC offset, 50 would be positive 50% of 1 Volt, or 500 millivolts.",
                     "name": "level",
-                    "type": "float"
+                    "type": "int"
                 },
                 {
                     "doc": "Trigger source. Refer to the CompuScope documentation for valid values.",
