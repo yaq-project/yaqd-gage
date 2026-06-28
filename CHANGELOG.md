@@ -6,7 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 ## [Unreleased]
 
 ### Changed
+- updated SDK: uses python 3.10-3.11
 - adc-to-voltage conversion formula now matches that of the SDK docs (64x different from previous formula)
+
+### Fixed
+- daemons will cleanly shut down on error or via client shutdown command (we release the hardware handle)
 
 ## [2026.1.0]
 
