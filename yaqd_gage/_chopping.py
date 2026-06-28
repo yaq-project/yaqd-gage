@@ -58,8 +58,7 @@ class CompuScope(HasMeasureTrigger, IsSensor, IsDaemon):
         config["TriggerTimeout"] = self._config["trigger_time_out"]
         config["TriggerHoldoff"] = self._config["trigger_hold_off"]
         config["ExtClk"] = int(self._config["ext_clk"])
-        config["TimeStampConfig"] = 0  # self._config["time_stamp_mode"]
-        # config["TimeStampClock"] = self._config["time_stamp_clock"]
+        config["TimeStampConfig"] = 0
         # from state
         for k in config:
             self.logger.info(f"{k}: {acq.get(k)} | {config.get(k)}")
@@ -76,8 +75,6 @@ class CompuScope(HasMeasureTrigger, IsSensor, IsDaemon):
             couplings = {"DC": 1, "AC": 2}
             config["Coupling"] = couplings[channel["coupling"]]
             config["Impedance"] = impedences[channel["impedance"]]
-            # config["DiffInput"] = int(channel["diff_input"])
-            # config["DirectADC"] = int(channel["direct_adc"])
             config["Filter"] = int(channel["filter"])
             config["DcOffset"] = channel["dc_offset"]
             self._pg.set_channel_config(channel_index + 1, config)
@@ -123,7 +120,6 @@ class CompuScope(HasMeasureTrigger, IsSensor, IsDaemon):
     async def _measure(self):
         out = dict()
         # apply state variables
-        photon_index = self._state["photon_index"]
         photon_threshold = self._state["photon_threshold"]
         self._pg.set_acquisition_config({"SegmentCount": self._state["segment_count"]})
         self._pg.set_multiple_rec_average_count(self._state["record_count"])
@@ -178,7 +174,6 @@ class CompuScope(HasMeasureTrigger, IsSensor, IsDaemon):
             await asyncio.sleep(0)
         # segments: dict with keys of channel, values are 1D array of 1D arrays
         # count photon events
-        # properties: photon_index, photon_threshold (perhaps dictionary for each channel?)
         counts = np.array([shot > photon_threshold for shot in segments["ai0"]], dtype=bool)
         out["pi0"] = counts.sum()
         # take means
@@ -187,7 +182,7 @@ class CompuScope(HasMeasureTrigger, IsSensor, IsDaemon):
         out["ai2"] = np.mean(segments["ai2"])
         out["ai3"] = np.mean(segments["ai3"])
 
-        # ai0-derived channels
+        # chopping-derived channels
         # TODO: remove hard-code ai0, put in config
         for phase in "abcd":
             if regions[phase]:
