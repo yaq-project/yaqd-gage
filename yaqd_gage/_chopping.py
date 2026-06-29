@@ -24,6 +24,7 @@ class CompuScope(HasMeasureTrigger, IsSensor, IsDaemon):
         self._pg = PyGage()
         self._channel_names = []
         self._max_segment_count = None  # redefined in _config_pygage
+        self._tail_size = None
         self._config_pygage()
         self._channel_names.append("ai1")
         self._channel_names.append("ai2")
@@ -66,13 +67,13 @@ class CompuScope(HasMeasureTrigger, IsSensor, IsDaemon):
         self._pg.set_acquisition_config(config)
         self._pg.set_multiple_rec_average_count(self._state["record_count"])
         # channel config
+        couplings = {"DC": 1, "AC": 2}
         for channel_index, channel in enumerate(self._config["channels"]):
             self.logger.info(f"{channel_index=}")
             # cfg = self._pg.get_channel_config(channel_index)
             # self.logger.info(cfg)
             config = {}
             config["InputRange"] = channel["range"]
-            couplings = {"DC": 1, "AC": 2}
             config["Coupling"] = couplings[channel["coupling"]]
             config["Impedance"] = impedences[channel["impedance"]]
             config["Filter"] = int(channel["filter"])
@@ -96,6 +97,7 @@ class CompuScope(HasMeasureTrigger, IsSensor, IsDaemon):
             self._pg.set_trigger_config(trigger_index + 1, config)
         # finish
         self._pg.commit()
+        self._tail_size = self._pg.get_segment_tail_size()
         self._max_segment_count = self._pg.max_segment_count
 
     def get_edge_width_count(self) -> int:
@@ -135,14 +137,40 @@ class CompuScope(HasMeasureTrigger, IsSensor, IsDaemon):
                 break
             await asyncio.sleep(0)
         # read out
-        after = time.time()
+        finished_measurement = time.time()
         segments = {}
         segment_count = self._state["segment_count"]
         record_count = self._state["record_count"]
-        for i in range(0, len(self._config["channels"])):
+        # trick the daq into thinking depth is the total size of the data
+        self.total_size = segment_count * (self._config["depth"] + self._tail_size)
+        temp_segment_size = segment_count * (self._config["segment_size"] + self._tail_size)
+        self.logger.info(f"{self.total_size=}, {self._tail_size=}")
+        self._pg.set_acquisition_config(
+            {
+                "Depth" : self.total_size,
+                "SegmentCount": 1,
+                "SegmentSize": temp_segment_size,
+            }
+        )
+        self._pg.commit()
+
+        config = self._pg.get_acquisition_config()
+        self.logger.info(f"{config=}")
+        for i in [0, 3]: #  range(0, len(self._config["channels"])):
             s = await self._process_single_channel(i, segment_count, record_count)
             segments.update(s)
             await asyncio.sleep(0)
+        self._pg.set_acquisition_config(
+            {
+                "Depth" : self._config["depth"], 
+                "SegmentCount": segment_count, 
+                "SegmentSize": self._config["segment_size"]
+            },
+        )
+        self._pg.commit()
+
+        fetched_measurement = time.time()
+
         self._segments = segments
         # get edges
         if self._state["edge_width_count"]:
@@ -174,12 +202,13 @@ class CompuScope(HasMeasureTrigger, IsSensor, IsDaemon):
             await asyncio.sleep(0)
         # segments: dict with keys of channel, values are 1D array of 1D arrays
         # count photon events
+        # properties: photon_index, photon_threshold (perhaps dictionary for each channel?)
         counts = np.array([shot > photon_threshold for shot in segments["ai0"]], dtype=bool)
         out["pi0"] = counts.sum()
         # take means
         out["ai0"] = np.mean(segments["ai0"])
-        out["ai1"] = np.mean(segments["ai1"])
-        out["ai2"] = np.mean(segments["ai2"])
+        out["ai1"] = np.nan  # np.mean(segments["ai1"])
+        out["ai2"] = np.nan  # np.mean(segments["ai2"])
         out["ai3"] = np.mean(segments["ai3"])
 
         # chopping-derived channels
@@ -198,9 +227,10 @@ class CompuScope(HasMeasureTrigger, IsSensor, IsDaemon):
             )
             out[f"{key}_diff_ab"] = out[f"{key}_b"] - out[f"{key}_a"]
             out[f"{key}_diff_ad"] = out[f"{key}_d"] - out[f"{key}_a"]
-        finished = time.time()
-        self.logger.info(f"measurement: {after-before} sec")
-        self.logger.info(f"maths: {finished-after} sec")
+        proceessed_measurement = time.time()
+        self.logger.info(f"measurement: {finished_measurement-before} sec")
+        self.logger.info(f"data xt: {fetched_measurement-finished_measurement} sec")
+        self.logger.info(f"processing: {proceessed_measurement-fetched_measurement} sec")
 
         return out
 
@@ -211,24 +241,27 @@ class CompuScope(HasMeasureTrigger, IsSensor, IsDaemon):
         out[f"ai{channel_index}"] = np.zeros(segment_count, dtype=float)
         system_info = self._pg.get_system_info()
         channel_info = self._pg.get_channel_config(channel_index + 1)
-        for segment_index in range(segment_count):
-            # samples
-            seg = self._pg.transfer_data(
-                channel_index=channel_index + 1,
-                start_position=0,
-                transfer_length=self._config["depth"],
-                segment_index=segment_index + 1,
-                transfer_mode=transfer_modes["data_32"],
-            )[0]
-            seg = np.array(seg, dtype=float)
-            seg = to_voltage(
-                seg,
+
+        segs = self._pg.transfer_data(
+            channel_index=channel_index+1,
+            start_position=0,
+            transfer_length=self.total_size,
+            segment_index=1,
+            transfer_mode=transfer_modes["data_32"]
+        )[0]
+        self.logger.info(f"{segs=}")
+        segs = np.array(segs, dtype=float).reshape(segment_count, -1)
+        segs = to_voltage(
+                segs,
                 record_count,
                 system_info["SampleOffset"],
                 channel_info["DcOffset"],
                 channel_info["InputRange"],
                 system_info["SampleResolution"],
-            )
+        )
+        self.logger.info(segs.shape)
+        for si in range(segs.shape[0]):
+            seg = segs[si]
             self._samples[f"ai{channel_index}"] = seg
 
             # signal
@@ -241,16 +274,15 @@ class CompuScope(HasMeasureTrigger, IsSensor, IsDaemon):
                 start = self._config["channels"][channel_index]["baseline_start_index"]
                 stop = self._config["channels"][channel_index]["baseline_stop_index"]
                 baseline = np.average(seg[start:stop])
-                out[f"ai{channel_index}"][segment_index] = signal - baseline
+                out[f"ai{channel_index}"][si] = signal - baseline
             else:
-                out[f"ai{channel_index}"][segment_index] = signal
+                out[f"ai{channel_index}"][si] = signal
 
             # invert
             if self._config["channels"][channel_index]["invert"]:
-                out[f"ai{channel_index}"][segment_index] *= -1
+                out[f"ai{channel_index}"][si] *= -1
 
             await asyncio.sleep(0)
-
         return out
 
     def close(self):

@@ -105,8 +105,16 @@ class PyGage(object):
         return self.interface.GetMulRecAverageCount(self.handle)
 
     @compuscope_error_handling
+    def get_segment_tail_size(self):
+        return self.interface.GetSegmentTailSizeInBytes(self.handle)
+        
+    @compuscope_error_handling
     def get_status(self):
         return self.interface.GetStatus(self.handle)
+
+    @compuscope_error_handling
+    def get_system_caps(self, key):
+        return self.interface.GetSystemCaps(self.handle, key)
 
     @compuscope_error_handling
     def get_trigger_config(self, trigger_index):
