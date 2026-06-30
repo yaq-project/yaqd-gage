@@ -3,7 +3,7 @@ __all__ = ["CompuScope"]
 
 import asyncio
 import time
-from typing import Dict, List
+from typing import Dict
 
 import numpy as np
 
@@ -75,9 +75,6 @@ class CompuScope(GaGeSynchronous):
         # finish
         self._pg.commit()
         self._max_segment_count = self._pg.max_segment_count
-
-    def get_measured_samples(self):
-        return self._samples
 
     @async_uses_pygage
     async def _measure(self):

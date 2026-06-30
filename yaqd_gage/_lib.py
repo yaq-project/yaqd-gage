@@ -61,6 +61,9 @@ class GaGeSynchronous(HasMeasureTrigger, IsSensor, IsDaemon):
     def set_segment_count(self, count: int) -> None:
         self._state["segment_count"] = count
 
+    def get_measured_samples(self):
+        return self._samples
+
     def close(self):
         self._pg.free_system()
 

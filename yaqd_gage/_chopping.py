@@ -113,9 +113,6 @@ class CompuScope(GaGeSynchronous):
     def get_edge_width_count(self) -> int:
         return self._state["edge_width_count"]
 
-    def get_measured_samples(self):
-        return self._samples
-
     def get_measured_segments(self):
         return self._segments
 
