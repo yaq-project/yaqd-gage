@@ -13,11 +13,11 @@ class GaGeSynchronous(HasMeasureTrigger, IsSensor, IsDaemon):
 
     async def _capture_and_fetch(
         self,
-        channel_indices: list[int],
-        segment_count,
-        record_count=1,
+        channel_indices:list[int],
+        segment_count:int,
+        record_count:int=1,
     ):
-        before = time.time()
+        t_start = time.time()
         self._pg.start_capture()
         # wait for capture to complete
         while True:
@@ -26,7 +26,7 @@ class GaGeSynchronous(HasMeasureTrigger, IsSensor, IsDaemon):
                 break
             await asyncio.sleep(0)
 
-        finished_measurement = time.time()
+        t_measured = time.time()
         # read out
         shots = {}
         # trick the daq into thinking depth is the total size of the data
@@ -55,9 +55,9 @@ class GaGeSynchronous(HasMeasureTrigger, IsSensor, IsDaemon):
             },
         )
         self._pg.commit()
-        fetched_measurement = time.time()
-        self.logger.info(f"measurement: {finished_measurement-before} sec")
-        self.logger.info(f"data xt: {fetched_measurement-finished_measurement} sec")
+        t_fetched = time.time()
+        self.logger.info(f"measurement: {t_measured-t_start} sec")
+        self.logger.info(f"data xt: {t_fetched-t_measured} sec")
         return shots
 
     def _process_single_channel(
@@ -102,7 +102,6 @@ class GaGeSynchronous(HasMeasureTrigger, IsSensor, IsDaemon):
             stop = channel_config["baseline_stop_index"]
             baseline = segs[start:stop].mean(axis=0)
             signal = signal - baseline
-
         # invert
         if channel_config["invert"]:
             signal *= -1

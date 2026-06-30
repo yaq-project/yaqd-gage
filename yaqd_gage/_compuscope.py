@@ -7,8 +7,8 @@ from typing import Dict
 
 import numpy as np
 
-from ._constants import acq_status_codes, transfer_modes
-from ._pygage import PyGage, uses_pygage, async_uses_pygage, to_voltage
+from ._constants import acq_status_codes
+from ._pygage import PyGage, uses_pygage, async_uses_pygage
 from ._lib import GaGeSynchronous
 
 impedences = {"fifty": 50, "onemeg": 1_000_000}
