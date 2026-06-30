@@ -9,8 +9,9 @@ import numpy as np  # type: ignore
 
 from yaqd_core import HasMeasureTrigger, IsSensor, IsDaemon
 
-from ._constants import acq_status_codes, transfer_modes
-from ._pygage import PyGage, uses_pygage, async_uses_pygage, to_voltage
+from ._constants import acq_status_codes
+from ._pygage import PyGage, uses_pygage, async_uses_pygage
+from ._lib import _process_single_channel
 
 
 impedences = {"fifty": 50, "onemeg": 1_000_000}
@@ -59,7 +60,16 @@ class CompuScope(HasMeasureTrigger, IsSensor, IsDaemon):
         config["TriggerTimeout"] = self._config["trigger_time_out"]
         config["TriggerHoldoff"] = self._config["trigger_hold_off"]
         config["ExtClk"] = int(self._config["ext_clk"])
-        config["TimeStampConfig"] = 0
+
+        if False:  # TODO: test this
+            timestamp_config = 0x00
+            if self._config["time_stamp_clock"] == "fixed":
+                timestamp_config |= 0x1
+            if self._config["time_stamp_mode"] == "free":
+                timestamp_config |= 0x10
+            config["TimeStampConfig"] = timestamp_config
+        else:
+            config["TimeStampConfig"] = 0
         # from state
         for k in config:
             self.logger.info(f"{k}: {acq.get(k)} | {config.get(k)}")
@@ -123,8 +133,10 @@ class CompuScope(HasMeasureTrigger, IsSensor, IsDaemon):
         out = dict()
         # apply state variables
         photon_threshold = self._state["photon_threshold"]
-        self._pg.set_acquisition_config({"SegmentCount": self._state["segment_count"]})
-        self._pg.set_multiple_rec_average_count(self._state["record_count"])
+        segment_count = self._state["segment_count"]
+        record_count = self._state["record_count"]
+        self._pg.set_acquisition_config({"SegmentCount": segment_count})
+        self._pg.set_multiple_rec_average_count(record_count)
         self._pg.commit()
         self._max_segment_count = self._pg.max_segment_count
         # start capture
@@ -139,12 +151,10 @@ class CompuScope(HasMeasureTrigger, IsSensor, IsDaemon):
         # read out
         finished_measurement = time.time()
         segments = {}
-        segment_count = self._state["segment_count"]
-        record_count = self._state["record_count"]
         # trick the daq into thinking depth is the total size of the data
         self.total_size = segment_count * (self._config["depth"] + self._tail_size)
         temp_segment_size = segment_count * (self._config["segment_size"] + self._tail_size)
-        self.logger.info(f"{self.total_size=}, {self._tail_size=}")
+        self.logger.debug(f"{self.total_size=}, {self._tail_size=}")
         self._pg.set_acquisition_config(
             {
                 "Depth": self.total_size,
@@ -153,12 +163,16 @@ class CompuScope(HasMeasureTrigger, IsSensor, IsDaemon):
             }
         )
         self._pg.commit()
-
-        config = self._pg.get_acquisition_config()
-        self.logger.info(f"{config=}")
-        for i in [0, 3]:  #  range(0, len(self._config["channels"])):
-            s = await self._process_single_channel(i, segment_count, record_count)
-            segments.update(s)
+        for i in [0, 3]:
+            segments = _process_single_channel(
+                self, i, segment_count, record_count, self.total_size
+            )
+            out._samples[f"ai{i}"] = segments[-1]
+            segments.update(
+                {
+                    f"ai{i}": segments
+                }
+            )
             await asyncio.sleep(0)
         self._pg.set_acquisition_config(
             {
@@ -179,7 +193,6 @@ class CompuScope(HasMeasureTrigger, IsSensor, IsDaemon):
             edges = np.convolve(edges, np.full(self._state["edge_width_count"], True), mode="same")
         else:
             edges = np.full(segment_count, False)
-        await asyncio.sleep(0)
         # get regions
         self._segments["regions"] = np.full(self._state["segment_count"], "", dtype="<U1")
         regions = {k: [] for k in self._config["segment_bins"].keys()}
@@ -232,57 +245,6 @@ class CompuScope(HasMeasureTrigger, IsSensor, IsDaemon):
         self.logger.info(f"data xt: {fetched_measurement-finished_measurement} sec")
         self.logger.info(f"processing: {proceessed_measurement-fetched_measurement} sec")
 
-        return out
-
-    async def _process_single_channel(
-        self, channel_index: int, segment_count: int, record_count: int
-    ) -> Dict[str, Any]:
-        out = dict()
-        out[f"ai{channel_index}"] = np.zeros(segment_count, dtype=float)
-        system_info = self._pg.get_system_info()
-        channel_info = self._pg.get_channel_config(channel_index + 1)
-
-        segs = self._pg.transfer_data(
-            channel_index=channel_index + 1,
-            start_position=0,
-            transfer_length=self.total_size,
-            segment_index=1,
-            transfer_mode=transfer_modes["data_32"],
-        )[0]
-        self.logger.info(f"{segs=}")
-        segs = np.array(segs, dtype=float).reshape(segment_count, -1)
-        segs = to_voltage(
-            segs,
-            record_count,
-            system_info["SampleOffset"],
-            channel_info["DcOffset"],
-            channel_info["InputRange"],
-            system_info["SampleResolution"],
-        )
-        self.logger.info(segs.shape)
-        for si in range(segs.shape[0]):
-            seg = segs[si]
-            self._samples[f"ai{channel_index}"] = seg
-
-            # signal
-            start = self._config["channels"][channel_index]["signal_start_index"]
-            stop = self._config["channels"][channel_index]["signal_stop_index"]
-            signal = np.average(seg[start:stop])
-
-            # baseline
-            if self._config["channels"][channel_index]["use_baseline"]:
-                start = self._config["channels"][channel_index]["baseline_start_index"]
-                stop = self._config["channels"][channel_index]["baseline_stop_index"]
-                baseline = np.average(seg[start:stop])
-                out[f"ai{channel_index}"][si] = signal - baseline
-            else:
-                out[f"ai{channel_index}"][si] = signal
-
-            # invert
-            if self._config["channels"][channel_index]["invert"]:
-                out[f"ai{channel_index}"][si] *= -1
-
-            await asyncio.sleep(0)
         return out
 
     def close(self):

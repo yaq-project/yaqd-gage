@@ -11,7 +11,7 @@ from yaqd_core import HasMeasureTrigger, IsSensor, IsDaemon
 
 from ._constants import acq_status_codes, transfer_modes
 from ._pygage import PyGage, uses_pygage, async_uses_pygage, to_voltage
-
+from ._lib import process_single_channel
 
 impedences = {"fifty": 50, "onemeg": 1_000_000}
 
@@ -90,7 +90,8 @@ class CompuScope(HasMeasureTrigger, IsSensor, IsDaemon):
     @async_uses_pygage
     async def _measure(self):
         # apply state
-        self._pg.set_acquisition_config({"SegmentCount": self._state["segment_count"]})
+        segment_count = self._state["segment_count"]
+        self._pg.set_acquisition_config({"SegmentCount": segment_count})
         self._pg.commit()
         # start capture
         self._pg.start_capture()
@@ -103,9 +104,35 @@ class CompuScope(HasMeasureTrigger, IsSensor, IsDaemon):
             await asyncio.sleep(0)
         self.logger.debug("TIME WAITED", time.time() - before)
         # read out
+        total_size = segment_count * (self._config["depth"] + self._tail_size)
+        temp_segment_size = segment_count * (self._config["segment_size"] + self._tail_size)
+        self._pg.set_acquisition_config(
+            {
+                "Depth" : self.total_size,
+                "SegmentCount": 1,
+                "SegmentSize": temp_segment_size,
+            }
+        )
+        self._pg.commit()
+
         out = {}
         for i in range(0, len(self._config["channels"])):
-            out.update(self._process_single_channel(i))
+            out.update(
+                {
+                    f"ai{i}": process_single_channel(self, i, segment_count, 1, )
+                }
+            )
+            await asyncio.sleep(0)
+
+        self._pg.set_acquisition_config(
+            {
+                "Depth" : self._config["depth"], 
+                "SegmentCount": segment_count, 
+                "SegmentSize": self._config["segment_size"]
+            },
+        )
+        self._pg.commit()
+
         self.logger.debug(out)
         return out
 
@@ -116,7 +143,6 @@ class CompuScope(HasMeasureTrigger, IsSensor, IsDaemon):
         system_info = self._pg.get_system_info()
         channel_info = self._pg.get_channel_config(channel_index + 1)
         for segment in range(self._state["segment_count"]):
-            # TODO: guess transfer mode from if multirecord averaging
             seg = self._pg.transfer_data(
                 channel_index=channel_index + 1,
                 start_position=0,
