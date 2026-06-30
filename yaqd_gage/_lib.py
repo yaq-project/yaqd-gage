@@ -13,9 +13,9 @@ class GaGeSynchronous(HasMeasureTrigger, IsSensor, IsDaemon):
 
     async def _capture_and_fetch(
         self,
-        channel_indices:list[int],
-        segment_count:int,
-        record_count:int=1,
+        channel_indices: list[int],
+        segment_count: int,
+        record_count: int = 1,
     ):
         t_start = time.time()
         self._pg.start_capture()
@@ -42,9 +42,7 @@ class GaGeSynchronous(HasMeasureTrigger, IsSensor, IsDaemon):
         )
         self._pg.commit()
         for i in channel_indices:
-            shots = self._process_single_channel(
-                self, i, segment_count, record_count, total_size
-            )
+            shots = self._process_single_channel(self, i, segment_count, record_count, total_size)
             shots.update({f"ai{i}": shots})
             await asyncio.sleep(0)
         self._pg.set_acquisition_config(

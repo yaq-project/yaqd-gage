@@ -129,7 +129,7 @@ class CompuScope(GaGeSynchronous):
         self._max_segment_count = self._pg.max_segment_count
         # start capture
         # TODO: settable channels for bins, signal
-        shots = await self._capture_and_fetch([0,3], segment_count, record_count)
+        shots = await self._capture_and_fetch([0, 3], segment_count, record_count)
 
         self._segments = shots
         start = time.time()

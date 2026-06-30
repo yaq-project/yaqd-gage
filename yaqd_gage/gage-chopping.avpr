@@ -229,7 +229,7 @@
             }
         },
         "get_measured_samples": {
-            "doc": "Get a dictionary of 1D arrays of measured samples.",
+            "doc": "Get the scope traces of a single segment.",
             "request": [],
             "response": {
                 "type": "map",
@@ -237,7 +237,7 @@
             }
         },
         "get_measured_segments": {
-            "doc": "Get a dictionary of 1D arrays of measured segments.",
+            "doc": "Get all measured segments in a measurement.",
             "request": [],
             "response": {
                 "type": "map",
