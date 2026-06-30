@@ -79,12 +79,6 @@ class CompuScope(GaGeSynchronous):
     def get_measured_samples(self):
         return self._samples
 
-    def get_segment_count(self) -> int:
-        return self._state["segment_count"]
-
-    def get_segment_count_limits(self) -> List[int]:
-        return [1, self._max_segment_count]
-
     @async_uses_pygage
     async def _measure(self):
         # apply state
@@ -138,10 +132,3 @@ class CompuScope(GaGeSynchronous):
 
         self.logger.debug(out)
         return out
-
-    def close(self):
-        self._pg.free_system()
-
-    def set_segment_count(self, count: int) -> None:
-        assert count <= self._max_segment_count
-        self._state["segment_count"] = count

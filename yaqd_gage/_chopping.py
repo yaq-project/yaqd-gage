@@ -122,12 +122,6 @@ class CompuScope(GaGeSynchronous):
     def get_record_count(self) -> int:
         return self._state["record_count"]
 
-    def get_segment_count(self) -> int:
-        return self._state["segment_count"]
-
-    def get_segment_count_limits(self) -> List[int]:
-        return [1, self._max_segment_count]
-
     @async_uses_pygage
     async def _measure(self):
         out = dict()
@@ -243,18 +237,12 @@ class CompuScope(GaGeSynchronous):
 
         return out
 
-    def close(self):
-        self._pg.free_system()
-
     def set_edge_width_count(self, count: int) -> None:
         assert count >= 0  # no limits_getter atm
         self._state["edge_width_count"] = count
 
     def set_record_count(self, count: int) -> None:
         self._state["record_count"] = count
-
-    def set_segment_count(self, count: int) -> None:
-        self._state["segment_count"] = count
 
     def set_photon_threshold(self, threshold) -> None:
         self._state["photon_threshold"] = threshold

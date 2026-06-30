@@ -36,6 +36,9 @@ class GaGeSynchronous(HasMeasureTrigger, IsSensor, IsDaemon):
             system_info["SampleResolution"],
         )
         self.logger.info(segs.shape)
+        # since all segements are now polled simultaneously, 
+        # users only view one sample trace for each measurement
+        self._samples[f"ai{channel_index}"] = segs[-1]
 
         # signal
         channel_config = self._config["channels"][channel_index]
@@ -54,3 +57,15 @@ class GaGeSynchronous(HasMeasureTrigger, IsSensor, IsDaemon):
             signal *= -1
 
         return signal
+
+    def set_segment_count(self, count: int) -> None:
+        self._state["segment_count"] = count
+
+    def close(self):
+        self._pg.free_system()
+
+    def get_segment_count(self) -> int:
+        return self._state["segment_count"]
+
+    def get_segment_count_limits(self) -> list[int]:
+        return [1, self._max_segment_count]
