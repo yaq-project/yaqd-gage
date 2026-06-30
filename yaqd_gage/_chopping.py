@@ -188,11 +188,7 @@ class CompuScope(GaGeSynchronous):
         for k, v in self._config["segment_bins"].items():
             start = None
             for i, voltage in enumerate(shots["ai3"]):
-                if (
-                    v["min"] <= voltage <= v["max"]
-                    and i != shots["ai3"].size - 1
-                    and not edges[i]
-                ):
+                if v["min"] <= voltage <= v["max"] and i != shots["ai3"].size - 1 and not edges[i]:
                     if start is None:
                         start = i
                 else:

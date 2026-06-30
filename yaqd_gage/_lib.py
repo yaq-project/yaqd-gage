@@ -36,7 +36,7 @@ class GaGeSynchronous(HasMeasureTrigger, IsSensor, IsDaemon):
             system_info["SampleResolution"],
         )
         self.logger.info(segs.shape)
-        # since all segements are now polled simultaneously, 
+        # since all segements are now polled simultaneously,
         # users only view one sample trace for each measurement
         self._samples[f"ai{channel_index}"] = segs[-1]
 
