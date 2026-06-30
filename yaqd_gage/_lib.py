@@ -7,12 +7,12 @@ from ._pygage import to_voltage
 
 
 class GaGeSynchronous(HasMeasureTrigger, IsSensor, IsDaemon):
-    """parent class for synchronous (non-streaming) acquisitions.  mostly daemons """
+    """parent class for synchronous (non-streaming) acquisitions.  mostly daemons"""
 
     def _process_single_channel(
         self,
-        channel_index: int, 
-        segment_count: int, 
+        channel_index: int,
+        segment_count: int,
         record_count: int,
         total_size: int,
     ) -> np.array:
@@ -20,20 +20,20 @@ class GaGeSynchronous(HasMeasureTrigger, IsSensor, IsDaemon):
         channel_info = self._pg.get_channel_config(channel_index + 1)
 
         segs = self._pg.transfer_data(
-            channel_index=channel_index+1,
+            channel_index=channel_index + 1,
             start_position=0,
             transfer_length=total_size,
             segment_index=1,
-            transfer_mode=transfer_modes["data_32"]
+            transfer_mode=transfer_modes["data_32"],
         )[0]
         segs = np.array(segs, dtype=float).reshape(segment_count, -1)
         segs = to_voltage(
-                segs,
-                record_count,
-                system_info["SampleOffset"],
-                channel_info["DcOffset"],
-                channel_info["InputRange"],
-                system_info["SampleResolution"],
+            segs,
+            record_count,
+            system_info["SampleOffset"],
+            channel_info["DcOffset"],
+            channel_info["InputRange"],
+            system_info["SampleResolution"],
         )
         self.logger.info(segs.shape)
 
