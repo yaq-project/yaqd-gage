@@ -144,7 +144,7 @@ class CompuScope(GaGeSynchronous):
             await asyncio.sleep(0)
         # read out
         finished_measurement = time.time()
-        segments = {}
+        shots = {}
         # trick the daq into thinking depth is the total size of the data
         self.total_size = segment_count * (self._config["depth"] + self._tail_size)
         temp_segment_size = segment_count * (self._config["segment_size"] + self._tail_size)
@@ -158,11 +158,10 @@ class CompuScope(GaGeSynchronous):
         )
         self._pg.commit()
         for i in [0, 3]:
-            segments = self._process_single_channel(
+            shots = self._process_single_channel(
                 self, i, segment_count, record_count, self.total_size
             )
-            out._samples[f"ai{i}"] = segments[-1]
-            segments.update({f"ai{i}": segments})
+            shots.update({f"ai{i}": shots})
             await asyncio.sleep(0)
         self._pg.set_acquisition_config(
             {
@@ -175,10 +174,10 @@ class CompuScope(GaGeSynchronous):
 
         fetched_measurement = time.time()
 
-        self._segments = segments
+        self._segments = shots
         # get edges
         if self._state["edge_width_count"]:
-            gradient = np.gradient(segments["ai3"])
+            gradient = np.gradient(shots["ai3"])
             edges = np.abs(gradient) > 0.1
             edges = np.convolve(edges, np.full(self._state["edge_width_count"], True), mode="same")
         else:
@@ -188,10 +187,10 @@ class CompuScope(GaGeSynchronous):
         regions = {k: [] for k in self._config["segment_bins"].keys()}
         for k, v in self._config["segment_bins"].items():
             start = None
-            for i, voltage in enumerate(segments["ai3"]):
+            for i, voltage in enumerate(shots["ai3"]):
                 if (
                     v["min"] <= voltage <= v["max"]
-                    and i != segments["ai3"].size - 1
+                    and i != shots["ai3"].size - 1
                     and not edges[i]
                 ):
                     if start is None:
@@ -206,13 +205,13 @@ class CompuScope(GaGeSynchronous):
         # segments: dict with keys of channel, values are 1D array of 1D arrays
         # count photon events
         # properties: photon_index, photon_threshold (perhaps dictionary for each channel?)
-        counts = np.array([shot > photon_threshold for shot in segments["ai0"]], dtype=bool)
+        counts = np.array([shot > photon_threshold for shot in shots["ai0"]], dtype=bool)
         out["pi0"] = counts.sum()
         # take means
-        out["ai0"] = np.mean(segments["ai0"])
+        out["ai0"] = np.mean(shots["ai0"])
         out["ai1"] = np.nan  # np.mean(segments["ai1"])
         out["ai2"] = np.nan  # np.mean(segments["ai2"])
-        out["ai3"] = np.mean(segments["ai3"])
+        out["ai3"] = np.mean(shots["ai3"])
 
         # chopping-derived channels
         # TODO: remove hard-code ai0, put in config
@@ -220,7 +219,7 @@ class CompuScope(GaGeSynchronous):
             if regions[phase]:
                 valid = np.r_[tuple(regions[phase])]
                 out[f"pi0_{phase}"] = np.mean(counts[valid])
-                out[f"ai0_{phase}"] = np.mean(segments["ai0"][valid])
+                out[f"ai0_{phase}"] = np.mean(shots["ai0"][valid])
             else:
                 out[f"pi0_{phase}"] = out[f"ai0_{phase}"] = np.nan
 
