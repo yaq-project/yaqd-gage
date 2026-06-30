@@ -3,20 +3,18 @@ __all__ = ["CompuScope"]
 
 import asyncio
 import time
-from typing import Dict, Any, List
+from typing import Dict, List
 
-import numpy as np  # type: ignore
-
-from yaqd_core import HasMeasureTrigger, IsSensor, IsDaemon
+import numpy as np
 
 from ._constants import acq_status_codes, transfer_modes
 from ._pygage import PyGage, uses_pygage, async_uses_pygage, to_voltage
-from ._lib import process_single_channel
+from ._lib import GaGeSynchronous
 
 impedences = {"fifty": 50, "onemeg": 1_000_000}
 
 
-class CompuScope(HasMeasureTrigger, IsSensor, IsDaemon):
+class CompuScope(GaGeSynchronous):
     _kind = "gage-compuscope"
 
     def __init__(self, name, config, config_filepath):
@@ -119,7 +117,7 @@ class CompuScope(HasMeasureTrigger, IsSensor, IsDaemon):
         for i in range(0, len(self._config["channels"])):
             out.update(
                 {
-                    f"ai{i}": process_single_channel(
+                    f"ai{i}": self._process_single_channel(
                         self,
                         i,
                         segment_count,
@@ -139,51 +137,6 @@ class CompuScope(HasMeasureTrigger, IsSensor, IsDaemon):
         self._pg.commit()
 
         self.logger.debug(out)
-        return out
-
-    def _process_single_channel(self, channel_index: int) -> Dict[str, float]:
-        out = dict()
-        # TODO: think about perhaps other dtypes
-        buffer = np.zeros(self._config["depth"], dtype=float)
-        system_info = self._pg.get_system_info()
-        channel_info = self._pg.get_channel_config(channel_index + 1)
-        for segment in range(self._state["segment_count"]):
-            seg = self._pg.transfer_data(
-                channel_index=channel_index + 1,
-                start_position=0,
-                transfer_length=self._config["depth"],
-                segment_index=segment + 1,
-                transfer_mode=transfer_modes["data_32"],
-            )[0]
-            seg = np.array(seg, dtype=float)
-            buffer += seg
-        # process samples array
-        buffer = to_voltage(
-            buffer,
-            self._state["segment_count"] * self._config["record_count"],
-            system_info["SampleOffset"],
-            channel_info["DcOffset"],
-            channel_info["InputRange"],
-            system_info["SampleResolution"],
-        )
-        self._samples[f"channel{channel_index+1}"] = buffer
-        # signal
-        start = self._config["channels"][channel_index]["signal_start_index"]
-        stop = self._config["channels"][channel_index]["signal_stop_index"]
-        signal = np.average(buffer[start:stop])
-        # baseline
-        if self._config["channels"][channel_index]["use_baseline"]:
-            start = self._config["channels"][channel_index]["baseline_start_index"]
-            stop = self._config["channels"][channel_index]["baseline_stop_index"]
-            baseline = np.average(buffer[start:stop])
-            out[f"channel{channel_index+1}"] = signal - baseline
-            out[f"channel{channel_index+1}_signal"] = signal
-            out[f"channel{channel_index+1}_baseline"] = baseline
-        else:
-            out[f"channel{channel_index+1}"] = signal
-        # invert
-        if self._config["channels"][channel_index]["invert"]:
-            out[f"channel{channel_index+1}"] *= -1
         return out
 
     def close(self):

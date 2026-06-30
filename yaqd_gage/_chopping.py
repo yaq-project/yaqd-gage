@@ -11,13 +11,13 @@ from yaqd_core import HasMeasureTrigger, IsSensor, IsDaemon
 
 from ._constants import acq_status_codes
 from ._pygage import PyGage, uses_pygage, async_uses_pygage
-from ._lib import _process_single_channel
+from ._lib import GaGeSynchronous
 
 
 impedences = {"fifty": 50, "onemeg": 1_000_000}
 
 
-class CompuScope(HasMeasureTrigger, IsSensor, IsDaemon):
+class CompuScope(GaGeSynchronous):
     _kind = "gage-chopping"
 
     def __init__(self, name, config, config_filepath):
@@ -164,7 +164,7 @@ class CompuScope(HasMeasureTrigger, IsSensor, IsDaemon):
         )
         self._pg.commit()
         for i in [0, 3]:
-            segments = _process_single_channel(
+            segments = self._process_single_channel(
                 self, i, segment_count, record_count, self.total_size
             )
             out._samples[f"ai{i}"] = segments[-1]
