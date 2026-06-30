@@ -107,7 +107,7 @@ class PyGage(object):
     @compuscope_error_handling
     def get_segment_tail_size(self):
         return self.interface.GetSegmentTailSizeInBytes(self.handle)
-        
+
     @compuscope_error_handling
     def get_status(self):
         return self.interface.GetStatus(self.handle)

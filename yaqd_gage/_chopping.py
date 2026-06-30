@@ -147,7 +147,7 @@ class CompuScope(HasMeasureTrigger, IsSensor, IsDaemon):
         self.logger.info(f"{self.total_size=}, {self._tail_size=}")
         self._pg.set_acquisition_config(
             {
-                "Depth" : self.total_size,
+                "Depth": self.total_size,
                 "SegmentCount": 1,
                 "SegmentSize": temp_segment_size,
             }
@@ -156,15 +156,15 @@ class CompuScope(HasMeasureTrigger, IsSensor, IsDaemon):
 
         config = self._pg.get_acquisition_config()
         self.logger.info(f"{config=}")
-        for i in [0, 3]: #  range(0, len(self._config["channels"])):
+        for i in [0, 3]:  #  range(0, len(self._config["channels"])):
             s = await self._process_single_channel(i, segment_count, record_count)
             segments.update(s)
             await asyncio.sleep(0)
         self._pg.set_acquisition_config(
             {
-                "Depth" : self._config["depth"], 
-                "SegmentCount": segment_count, 
-                "SegmentSize": self._config["segment_size"]
+                "Depth": self._config["depth"],
+                "SegmentCount": segment_count,
+                "SegmentSize": self._config["segment_size"],
             },
         )
         self._pg.commit()
@@ -243,21 +243,21 @@ class CompuScope(HasMeasureTrigger, IsSensor, IsDaemon):
         channel_info = self._pg.get_channel_config(channel_index + 1)
 
         segs = self._pg.transfer_data(
-            channel_index=channel_index+1,
+            channel_index=channel_index + 1,
             start_position=0,
             transfer_length=self.total_size,
             segment_index=1,
-            transfer_mode=transfer_modes["data_32"]
+            transfer_mode=transfer_modes["data_32"],
         )[0]
         self.logger.info(f"{segs=}")
         segs = np.array(segs, dtype=float).reshape(segment_count, -1)
         segs = to_voltage(
-                segs,
-                record_count,
-                system_info["SampleOffset"],
-                channel_info["DcOffset"],
-                channel_info["InputRange"],
-                system_info["SampleResolution"],
+            segs,
+            record_count,
+            system_info["SampleOffset"],
+            channel_info["DcOffset"],
+            channel_info["InputRange"],
+            system_info["SampleResolution"],
         )
         self.logger.info(segs.shape)
         for si in range(segs.shape[0]):
