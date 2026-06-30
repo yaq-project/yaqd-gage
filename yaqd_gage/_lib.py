@@ -28,22 +28,22 @@ class GaGeSynchronous(HasMeasureTrigger, IsSensor, IsDaemon):
 
         t_measured = time.time()
         # read out
-        shots = {}
+        out = {}
         # trick the daq into thinking depth is the total size of the data
         total_size = segment_count * (self._config["depth"] + self._tail_size)
         temp_segment_size = segment_count * (self._config["segment_size"] + self._tail_size)
-        self.logger.debug(f"{self.total_size=}, {self._tail_size=}")
+        self.logger.debug(f"{total_size=}, {self._tail_size=}")
         self._pg.set_acquisition_config(
             {
-                "Depth": self.total_size,
+                "Depth": total_size,
                 "SegmentCount": 1,
                 "SegmentSize": temp_segment_size,
             }
         )
         self._pg.commit()
         for i in channel_indices:
-            shots = self._process_single_channel(self, i, segment_count, record_count, total_size)
-            shots.update({f"ai{i}": shots})
+            shots = self._process_single_channel(i, segment_count, record_count, total_size)
+            out.update({f"ai{i}": shots})
             await asyncio.sleep(0)
         self._pg.set_acquisition_config(
             {
@@ -56,7 +56,7 @@ class GaGeSynchronous(HasMeasureTrigger, IsSensor, IsDaemon):
         t_fetched = time.time()
         self.logger.info(f"measurement: {t_measured-t_start} sec")
         self.logger.info(f"data xt: {t_fetched-t_measured} sec")
-        return shots
+        return out
 
     def _process_single_channel(
         self,

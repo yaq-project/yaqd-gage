@@ -12,6 +12,7 @@ from ._lib import GaGeSynchronous
 
 
 impedences = {"fifty": 50, "onemeg": 1_000_000}
+couplings = {"DC": 1, "AC": 2}
 
 
 class CompuScope(GaGeSynchronous):
@@ -57,7 +58,6 @@ class CompuScope(GaGeSynchronous):
         config["TriggerTimeout"] = self._config["trigger_time_out"]
         config["TriggerHoldoff"] = self._config["trigger_hold_off"]
         config["ExtClk"] = int(self._config["ext_clk"])
-
         if False:  # TODO: test this
             timestamp_config = 0x00
             if self._config["time_stamp_clock"] == "fixed":
@@ -74,7 +74,6 @@ class CompuScope(GaGeSynchronous):
         self._pg.set_acquisition_config(config)
         self._pg.set_multiple_rec_average_count(self._state["record_count"])
         # channel config
-        couplings = {"DC": 1, "AC": 2}
         for channel_index, channel in enumerate(self._config["channels"]):
             self.logger.info(f"{channel_index=}")
             # cfg = self._pg.get_channel_config(channel_index)
@@ -132,7 +131,7 @@ class CompuScope(GaGeSynchronous):
         shots = await self._capture_and_fetch([0, 3], segment_count, record_count)
 
         self._segments = shots
-        start = time.time()
+        t_start = time.time()
         # get edges
         if self._state["edge_width_count"]:
             gradient = np.gradient(shots["ai3"])
@@ -183,8 +182,8 @@ class CompuScope(GaGeSynchronous):
             )
             out[f"{key}_diff_ab"] = out[f"{key}_b"] - out[f"{key}_a"]
             out[f"{key}_diff_ad"] = out[f"{key}_d"] - out[f"{key}_a"]
-        proceessed_measurement = time.time()
-        self.logger.info(f"processing: {proceessed_measurement-start} sec")
+        t_processed = time.time()
+        self.logger.info(f"processing: {t_processed-t_start} sec")
 
         return out
 

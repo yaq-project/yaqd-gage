@@ -12,6 +12,7 @@ from ._pygage import PyGage, uses_pygage, async_uses_pygage
 from ._lib import GaGeSynchronous
 
 impedences = {"fifty": 50, "onemeg": 1_000_000}
+couplings = {"DC": 1, "AC": 2}
 
 
 class CompuScope(GaGeSynchronous):
@@ -24,10 +25,7 @@ class CompuScope(GaGeSynchronous):
         self._max_segment_count = None  # redefined in _config_pygage
         self._config_pygage()
         for i in range(0, len(self._config["channels"])):
-            self._channel_names.append(f"channel{i+1}")
-            if self._config["channels"][i]["use_baseline"]:
-                self._channel_names.append(f"channel{i+1}_signal")
-                self._channel_names.append(f"channel{i+1}_baseline")
+            self._channel_names.append(f"ai{i}")
         self._channel_units = {k: "V" for k in self._channel_names}
         self._samples: Dict[str, np.ndarray] = dict()
         self.set_segment_count(self._state["segment_count"])
@@ -41,11 +39,19 @@ class CompuScope(GaGeSynchronous):
         config["Depth"] = self._config["depth"]
         config["SegmentSize"] = self._config["segment_size"]
         config["TriggerDelay"] = self._config["trigger_delay"]
-        config["TriggerTimeOut"] = self._config["trigger_time_out"]
-        config["TriggerHoldOff"] = self._config["trigger_hold_off"]
+        config["SegmentCount"] = self._state["segment_count"]
+        config["TriggerTimeout"] = self._config["trigger_time_out"]
+        config["TriggerHoldoff"] = self._config["trigger_hold_off"]
         config["ExtClk"] = int(self._config["ext_clk"])
-        config["TimeStampMode"] = self._config["time_stamp_mode"]
-        config["TimeStampClock"] = self._config["time_stamp_clock"]
+        if False:  # TODO: test this
+            timestamp_config = 0x00
+            if self._config["time_stamp_clock"] == "fixed":
+                timestamp_config |= 0x1
+            if self._config["time_stamp_mode"] == "free":
+                timestamp_config |= 0x10
+            config["TimeStampConfig"] = timestamp_config
+        else:
+            config["TimeStampConfig"] = 0
         # from state
         config["SegmentCount"] = self._state["segment_count"]
         self._pg.set_acquisition_config(config)
@@ -54,11 +60,8 @@ class CompuScope(GaGeSynchronous):
         for channel_index, channel in enumerate(self._config["channels"]):
             config = {}
             config["InputRange"] = channel["range"]
-            couplings = {"DC": 1, "AC": 2}
             config["Coupling"] = couplings[channel["coupling"]]
             config["Impedance"] = impedences[channel["impedance"]]
-            config["DiffInput"] = int(channel["diff_input"])
-            config["DirectADC"] = int(channel["direct_adc"])
             config["Filter"] = int(channel["filter"])
             config["DcOffset"] = channel["dc_offset"]
             self._pg.set_channel_config(channel_index + 1, config)
@@ -66,37 +69,44 @@ class CompuScope(GaGeSynchronous):
         for trigger_index, trigger in enumerate(self._config["triggers"]):
             config = {}
             config["Condition"] = trigger["condition"]
-            config["Level"] = trigger["level"]
+            config["Level"] = int(trigger["level"])
             config["Source"] = trigger["source"]
-            config["InputRange"] = trigger["range"]
-            config["Impedance"] = impedences[channel["impedance"]]
+            config["ExtRange"] = trigger["range"]
+            config["ExtImpedance"] = impedences[channel["impedance"]]
+            config["ExtCoupling"] = couplings[channel["coupling"]]
             config["Relation"] = 0
             self._pg.set_trigger_config(trigger_index + 1, config)
         # finish
         self._pg.commit()
+        self._tail_size = self._pg.get_segment_tail_size()
         self._max_segment_count = self._pg.max_segment_count
 
     @async_uses_pygage
     async def _measure(self):
         # apply state
-        segment_count = self._state["segment_count"]
-        self._pg.set_acquisition_config({"SegmentCount": segment_count})
-        self._pg.commit()
-        # start capture
-        self._pg.start_capture()
-        # wait for capture to complete
-        before = time.time()
-        while True:
-            code = self._pg.get_status()
-            if acq_status_codes[code] == "ACQ_STATUS_READY":
-                break
-            await asyncio.sleep(0)
-        self.logger.debug("TIME WAITED", time.time() - before)
-        # read out
-        out = await self._process_ai_channels(
-            [_ for _ in range(len(self._config["channels"]))],
-            segment_count,
-        )
+        try:
+            segment_count = self._state["segment_count"]
+            self._pg.set_acquisition_config({"SegmentCount": segment_count})
+            self._pg.commit()
+            # start capture
+            self._pg.start_capture()
+            # wait for capture to complete
+            before = time.time()
+            while True:
+                code = self._pg.get_status()
+                if acq_status_codes[code] == "ACQ_STATUS_READY":
+                    break
+                await asyncio.sleep(0)
+            self.logger.debug("TIME WAITED", time.time() - before)
+            # read out
+            self.logger.info("here")
+            out = await self._capture_and_fetch(
+                [_ for _ in range(len(self._config["channels"]))],
+                segment_count,
+            )
 
-        self.logger.debug(out)
+            # self.logger.info(out)
+        except Exception as e:
+            self.logger.error(e, exc_info=True)
+            raise e
         return out
