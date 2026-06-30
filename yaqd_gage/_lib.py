@@ -1,13 +1,64 @@
 import numpy as np
+import asyncio
+import time
 
 from yaqd_core import HasMeasureTrigger, IsSensor, IsDaemon
 
-from ._constants import transfer_modes
+from ._constants import transfer_modes, acq_status_codes
 from ._pygage import to_voltage
 
 
 class GaGeSynchronous(HasMeasureTrigger, IsSensor, IsDaemon):
     """parent class for synchronous (non-streaming) acquisitions.  mostly daemons"""
+
+    async def _capture_and_fetch(
+        self,
+        channel_indices: list[int],
+        segment_count,
+        record_count=1,
+    ):
+        before = time.time()
+        self._pg.start_capture()
+        # wait for capture to complete
+        while True:
+            code = self._pg.get_status()
+            if acq_status_codes[code] == "ACQ_STATUS_READY":
+                break
+            await asyncio.sleep(0)
+
+        finished_measurement = time.time()
+        # read out
+        shots = {}
+        # trick the daq into thinking depth is the total size of the data
+        total_size = segment_count * (self._config["depth"] + self._tail_size)
+        temp_segment_size = segment_count * (self._config["segment_size"] + self._tail_size)
+        self.logger.debug(f"{self.total_size=}, {self._tail_size=}")
+        self._pg.set_acquisition_config(
+            {
+                "Depth": self.total_size,
+                "SegmentCount": 1,
+                "SegmentSize": temp_segment_size,
+            }
+        )
+        self._pg.commit()
+        for i in channel_indices:
+            shots = self._process_single_channel(
+                self, i, segment_count, record_count, total_size
+            )
+            shots.update({f"ai{i}": shots})
+            await asyncio.sleep(0)
+        self._pg.set_acquisition_config(
+            {
+                "Depth": self._config["depth"],
+                "SegmentCount": segment_count,
+                "SegmentSize": self._config["segment_size"],
+            },
+        )
+        self._pg.commit()
+        fetched_measurement = time.time()
+        self.logger.info(f"measurement: {finished_measurement-before} sec")
+        self.logger.info(f"data xt: {fetched_measurement-finished_measurement} sec")
+        return shots
 
     def _process_single_channel(
         self,

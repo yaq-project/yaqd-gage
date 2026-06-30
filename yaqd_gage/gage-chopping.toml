@@ -159,11 +159,11 @@ doc = "Get edge width count."
 response = "int"
 
 [messages.get_measured_samples]
-doc = "Get a dictionary of 1D arrays of measured samples."
+doc = "Get the scope traces of a single segment."
 response = {"type"="map", "values"="ndarray"}
 
 [messages.get_measured_segments]
-doc = "Get a dictionary of 1D arrays of measured segments."
+doc = "Get all measured segments in a measurement."
 response = {"type"="map", "values"="ndarray"}
 
 [messages.get_record_count]

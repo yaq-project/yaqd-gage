@@ -93,39 +93,10 @@ class CompuScope(GaGeSynchronous):
             await asyncio.sleep(0)
         self.logger.debug("TIME WAITED", time.time() - before)
         # read out
-        total_size = segment_count * (self._config["depth"] + self._tail_size)
-        temp_segment_size = segment_count * (self._config["segment_size"] + self._tail_size)
-        self._pg.set_acquisition_config(
-            {
-                "Depth": self.total_size,
-                "SegmentCount": 1,
-                "SegmentSize": temp_segment_size,
-            }
+        out = await self._process_ai_channels(
+            [_ for _ in range(len(self._config["channels"]))],
+            segment_count,
         )
-        self._pg.commit()
-
-        out = {}
-        for i in range(0, len(self._config["channels"])):
-            out.update(
-                {
-                    f"ai{i}": self._process_single_channel(
-                        self,
-                        i,
-                        segment_count,
-                        1,
-                    )
-                }
-            )
-            await asyncio.sleep(0)
-
-        self._pg.set_acquisition_config(
-            {
-                "Depth": self._config["depth"],
-                "SegmentCount": segment_count,
-                "SegmentSize": self._config["segment_size"],
-            },
-        )
-        self._pg.commit()
 
         self.logger.debug(out)
         return out

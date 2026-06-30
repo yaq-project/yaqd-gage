@@ -7,9 +7,6 @@ from typing import Dict, Any, List
 
 import numpy as np  # type: ignore
 
-from yaqd_core import HasMeasureTrigger, IsSensor, IsDaemon
-
-from ._constants import acq_status_codes
 from ._pygage import PyGage, uses_pygage, async_uses_pygage
 from ._lib import GaGeSynchronous
 
@@ -131,47 +128,11 @@ class CompuScope(GaGeSynchronous):
         self._pg.commit()
         self._max_segment_count = self._pg.max_segment_count
         # start capture
-        before = time.time()
-        self._pg.start_capture()
-        # wait for capture to complete
-        while True:
-            code = self._pg.get_status()
-            if acq_status_codes[code] == "ACQ_STATUS_READY":
-                break
-            await asyncio.sleep(0)
-        # read out
-        finished_measurement = time.time()
-        shots = {}
-        # trick the daq into thinking depth is the total size of the data
-        self.total_size = segment_count * (self._config["depth"] + self._tail_size)
-        temp_segment_size = segment_count * (self._config["segment_size"] + self._tail_size)
-        self.logger.debug(f"{self.total_size=}, {self._tail_size=}")
-        self._pg.set_acquisition_config(
-            {
-                "Depth": self.total_size,
-                "SegmentCount": 1,
-                "SegmentSize": temp_segment_size,
-            }
-        )
-        self._pg.commit()
-        for i in [0, 3]:
-            shots = self._process_single_channel(
-                self, i, segment_count, record_count, self.total_size
-            )
-            shots.update({f"ai{i}": shots})
-            await asyncio.sleep(0)
-        self._pg.set_acquisition_config(
-            {
-                "Depth": self._config["depth"],
-                "SegmentCount": segment_count,
-                "SegmentSize": self._config["segment_size"],
-            },
-        )
-        self._pg.commit()
-
-        fetched_measurement = time.time()
+        # TODO: settable channels for bins, signal
+        shots = await self._capture_and_fetch([0,3], segment_count, record_count)
 
         self._segments = shots
+        start = time.time()
         # get edges
         if self._state["edge_width_count"]:
             gradient = np.gradient(shots["ai3"])
@@ -223,9 +184,7 @@ class CompuScope(GaGeSynchronous):
             out[f"{key}_diff_ab"] = out[f"{key}_b"] - out[f"{key}_a"]
             out[f"{key}_diff_ad"] = out[f"{key}_d"] - out[f"{key}_a"]
         proceessed_measurement = time.time()
-        self.logger.info(f"measurement: {finished_measurement-before} sec")
-        self.logger.info(f"data xt: {fetched_measurement-finished_measurement} sec")
-        self.logger.info(f"processing: {proceessed_measurement-fetched_measurement} sec")
+        self.logger.info(f"processing: {proceessed_measurement-start} sec")
 
         return out
 
