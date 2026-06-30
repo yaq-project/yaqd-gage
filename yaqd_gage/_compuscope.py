@@ -108,7 +108,7 @@ class CompuScope(HasMeasureTrigger, IsSensor, IsDaemon):
         temp_segment_size = segment_count * (self._config["segment_size"] + self._tail_size)
         self._pg.set_acquisition_config(
             {
-                "Depth" : self.total_size,
+                "Depth": self.total_size,
                 "SegmentCount": 1,
                 "SegmentSize": temp_segment_size,
             }
@@ -119,16 +119,21 @@ class CompuScope(HasMeasureTrigger, IsSensor, IsDaemon):
         for i in range(0, len(self._config["channels"])):
             out.update(
                 {
-                    f"ai{i}": process_single_channel(self, i, segment_count, 1, )
+                    f"ai{i}": process_single_channel(
+                        self,
+                        i,
+                        segment_count,
+                        1,
+                    )
                 }
             )
             await asyncio.sleep(0)
 
         self._pg.set_acquisition_config(
             {
-                "Depth" : self._config["depth"], 
-                "SegmentCount": segment_count, 
-                "SegmentSize": self._config["segment_size"]
+                "Depth": self._config["depth"],
+                "SegmentCount": segment_count,
+                "SegmentSize": self._config["segment_size"],
             },
         )
         self._pg.commit()

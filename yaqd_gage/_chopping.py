@@ -168,11 +168,7 @@ class CompuScope(HasMeasureTrigger, IsSensor, IsDaemon):
                 self, i, segment_count, record_count, self.total_size
             )
             out._samples[f"ai{i}"] = segments[-1]
-            segments.update(
-                {
-                    f"ai{i}": segments
-                }
-            )
+            segments.update({f"ai{i}": segments})
             await asyncio.sleep(0)
         self._pg.set_acquisition_config(
             {
