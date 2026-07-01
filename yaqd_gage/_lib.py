@@ -1,6 +1,7 @@
 import numpy as np
 import asyncio
 import time
+import json
 
 from yaqd_core import HasMeasureTrigger, IsSensor, IsDaemon
 
@@ -120,3 +121,7 @@ class GaGeSynchronous(HasMeasureTrigger, IsSensor, IsDaemon):
 
     def get_segment_count_limits(self) -> list[int]:
         return [1, self._max_segment_count]
+
+    def get_acq_config(self) -> str:
+        d = self._pg.get_acquisition_config()
+        return json.dumps(d)        

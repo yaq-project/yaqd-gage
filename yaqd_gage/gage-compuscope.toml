@@ -150,6 +150,9 @@ request = [{"name"="count", "type"="int"}]
 doc = "Get current segment count limits as defined by on-board memory."
 response = {"type"="array", "items"="int"}
 
+[messages.get_acq_config]
+response = "string"
+
 [properties]
 
 [properties.segment_count]

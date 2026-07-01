@@ -202,6 +202,8 @@ request = [{"name"="threshold", "type"="float"}]
 doc = ""
 response = "string"
 
+[messages.get_acq_config]
+response = "string"
 
 [properties]
 
