@@ -124,4 +124,4 @@ class GaGeSynchronous(HasMeasureTrigger, IsSensor, IsDaemon):
 
     def get_acq_config(self) -> str:
         d = self._pg.get_acquisition_config()
-        return json.dumps(d)        
+        return json.dumps(d)

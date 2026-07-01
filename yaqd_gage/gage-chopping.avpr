@@ -165,6 +165,10 @@
             "request": [],
             "response": "boolean"
         },
+        "get_acq_config": {
+            "request": [],
+            "response": "string"
+        },
         "get_channel_names": {
             "doc": "Get current channel names.",
             "origin": "is-sensor",
