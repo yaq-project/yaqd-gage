@@ -26,7 +26,7 @@ class CompuScope(GaGeSynchronous):
         self._tail_size = None
         self._config_pygage()
         for pre in "ap":
-            seed = f"{pre}i{self._config["signal_channel"]}"
+            seed = f"{pre}i{self._config['signal_channel']}"
             self._channel_names += [
                 f"{seed}",
                 f"{seed}_a",
