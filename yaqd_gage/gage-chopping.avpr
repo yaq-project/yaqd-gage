@@ -61,9 +61,9 @@
             ]
         },
         "mode": {
-            "default": 1073741828,
-            "doc": "Sets the operating mode of the CompuScope system. Refer to the CompuScope documentation for valid values. Default is 1073741828 for FirmWare Averaging and four channels.",
-            "type": "int"
+            "default": "quad",
+            "doc": "Set how many channels will be used.",
+            "type": "acquisition_mode"
         },
         "model": {
             "default": null,
@@ -266,11 +266,6 @@
             "request": [],
             "response": "string"
         },
-        "get_record_count": {
-            "doc": "Get the number of acquisitions that are averaged on-board via firmware.",
-            "request": [],
-            "response": "int"
-        },
         "get_segment_count": {
             "doc": "Get the currently planned number of chunks.",
             "request": [],
@@ -334,16 +329,6 @@
             ],
             "response": "null"
         },
-        "set_record_count": {
-            "doc": "Set record count.",
-            "request": [
-                {
-                    "name": "count",
-                    "type": "int"
-                }
-            ],
-            "response": "null"
-        },
         "set_segment_count": {
             "doc": "Set the chunk count.",
             "request": [
@@ -396,17 +381,6 @@
             "type": "float",
             "units_getter": "get_photon_threshold_units"
         },
-        "record_count": {
-            "control_kind": "hinted",
-            "dynamic": true,
-            "getter": "get_record_count",
-            "limits_getter": null,
-            "options_getter": null,
-            "record_kind": "metadata",
-            "setter": "set_record_count",
-            "type": "int",
-            "units_getter": null
-        },
         "segment_count": {
             "control_kind": "hinted",
             "dynamic": true,
@@ -450,6 +424,16 @@
     ],
     "types": [
         {
+            "default": "quad",
+            "name": "acquisition_mode",
+            "symbols": [
+                "quad",
+                "dual",
+                "single"
+            ],
+            "type": "enum"
+        },
+        {
             "default": "DC",
             "name": "coupling_mode",
             "symbols": [
@@ -481,18 +465,6 @@
                 {
                     "name": "impedance",
                     "type": "impedance_mode"
-                },
-                {
-                    "default": false,
-                    "doc": "Enable differential input coupling. Not all CompuScope models support differential input coupling.",
-                    "name": "diff_input",
-                    "type": "boolean"
-                },
-                {
-                    "default": false,
-                    "doc": "Enable direct-to-ADC input coupling. Not all CompuScope models support direct-to-ADC input coupling.",
-                    "name": "direct_adc",
-                    "type": "boolean"
                 },
                 {
                     "default": false,
