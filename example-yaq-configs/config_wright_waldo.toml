@@ -1,3 +1,4 @@
+#:schema https://github.com/yaq-project/yaqd-gage/blob/main/yaqd_gage/gage-chopping_config.json
 [daq]
 port = 39003
 sample_rate = 25000000

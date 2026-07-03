@@ -5,6 +5,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+### Added
+- new json schema file for configs
+
 ### Changed
 - updated SDK: uses python 3.10-3.11
 - adc-to-voltage conversion formula now matches that of the SDK docs (64x different from previous formula)
