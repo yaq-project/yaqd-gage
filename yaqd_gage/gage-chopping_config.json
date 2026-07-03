@@ -1,0 +1,578 @@
+{
+    "$schema": "http://json-schema.org/draft-04/schema",
+    "additionalProperties": {
+        "additionalProperties": false,
+        "name": "shared-settings",
+        "properties": {
+            "channels": {
+                "default": [],
+                "items": {
+                    "$ref": "#/definitions/channel"
+                },
+                "type": [
+                    "array",
+                    "null"
+                ]
+            },
+            "depth": {
+                "default": 240,
+                "description": "Post-trigger depth, in samples.",
+                "format": "int32",
+                "type": [
+                    "integer",
+                    "null"
+                ]
+            },
+            "enable": {
+                "default": true,
+                "description": "Disable this daemon. The kind entry-point will not attempt to start this daemon.",
+                "type": [
+                    "boolean",
+                    "null"
+                ]
+            },
+            "ext_clk": {
+                "default": false,
+                "description": "Enable or disable external clocking functionality. If external clocking is activated, the sample rate must be set to the external clocking frequency. Not all CompuScope hardware supports external clocking.",
+                "type": [
+                    "boolean",
+                    "null"
+                ]
+            },
+            "log_level": {
+                "default": "info",
+                "description": "Set daemon log-level.",
+                "enum": [
+                    "debug",
+                    "info",
+                    "notice",
+                    "warning",
+                    "error",
+                    "critical",
+                    "alert",
+                    "emergency"
+                ],
+                "title": "level",
+                "type": [
+                    "string",
+                    "null"
+                ]
+            },
+            "log_to_file": {
+                "default": false,
+                "description": "Optionally force logging to a file.",
+                "type": [
+                    "boolean",
+                    "null"
+                ]
+            },
+            "loop_at_startup": {
+                "default": false,
+                "description": "If set to true, the daemon will begin to loop measure as soon as it starts.",
+                "type": [
+                    "boolean",
+                    "null"
+                ]
+            },
+            "make": {
+                "default": null,
+                "type": [
+                    "string",
+                    "null"
+                ]
+            },
+            "mode": {
+                "default": 1073741828,
+                "description": "Sets the operating mode of the CompuScope system. Refer to the CompuScope documentation for valid values. Default is 1073741828 for FirmWare Averaging and four channels.",
+                "format": "int32",
+                "type": [
+                    "integer",
+                    "null"
+                ]
+            },
+            "model": {
+                "default": null,
+                "type": [
+                    "string",
+                    "null"
+                ]
+            },
+            "port": {
+                "description": "TCP port for daemon to occupy.",
+                "format": "int32",
+                "type": "integer"
+            },
+            "sample_rate": {
+                "default": null,
+                "description": "Sampling rate in Hertz. If not provided, model-dependent default is used.",
+                "format": "int32",
+                "type": [
+                    "integer",
+                    "null"
+                ]
+            },
+            "segment_bins": {
+                "additionalProperties": {
+                    "$ref": "#/definitions/voltage_range"
+                },
+                "default": {},
+                "type": [
+                    "object",
+                    "null"
+                ]
+            },
+            "segment_size": {
+                "default": 240,
+                "description": "Size of the segment to capture. A segment is the sum of the pre- and post-trigger samples that are to be acquired.",
+                "format": "int32",
+                "type": [
+                    "integer",
+                    "null"
+                ]
+            },
+            "serial": {
+                "default": null,
+                "description": "Serial number for the particular device represented by the daemon",
+                "type": [
+                    "string",
+                    "null"
+                ]
+            },
+            "time_stamp_clock": {
+                "default": "Fixed",
+                "description": "The time-stamping clock may operate in one of two modes. In fixed mode, the on-board oscillator will be used as the counter source. In sample mode, a frequency derived from the sampling clock will be used as the counter source.",
+                "enum": [
+                    "Fixed",
+                    "Sample"
+                ],
+                "title": "time_stamp_clock_mode",
+                "type": [
+                    "string",
+                    "null"
+                ]
+            },
+            "time_stamp_mode": {
+                "default": "Free",
+                "description": "The time-stamping counter may be reset upon the start of each acquisition or left free-running.",
+                "enum": [
+                    "Free",
+                    "Reset"
+                ],
+                "title": "time_stampmode",
+                "type": [
+                    "string",
+                    "null"
+                ]
+            },
+            "trigger_delay": {
+                "default": 0,
+                "description": "Number of samples to acquire between the occurance of the trigger event and the actual logging of the trigger event. By using this you can more easily capture signals far away from the trigger. Not all CompuScope models support TriggerDelay.",
+                "format": "int32",
+                "type": [
+                    "integer",
+                    "null"
+                ]
+            },
+            "trigger_hold_off": {
+                "default": 0,
+                "description": "Number of samples during which trigger events will be ignored after the system begins capturing. This is useful for ensuring the accumulation of a specified amount of pre-trigger data.",
+                "format": "int32",
+                "type": [
+                    "integer",
+                    "null"
+                ]
+            },
+            "trigger_time_out": {
+                "default": 1000000,
+                "description": "Trigger timeout of the CompuScope system. The value is in 100 nanosecond units of time (e.g. a value of 10,000,000 gives a trigger timeout of 1 second). A value of -1 will cause the driver to wait indefinitely for a trigger.",
+                "format": "int32",
+                "type": [
+                    "integer",
+                    "null"
+                ]
+            },
+            "triggers": {
+                "default": [],
+                "items": {
+                    "$ref": "#/definitions/trigger"
+                },
+                "type": [
+                    "array",
+                    "null"
+                ]
+            }
+        },
+        "type": "object"
+    },
+    "definitions": {
+        "channel": {
+            "properties": {
+                "baseline_start_index": {
+                    "description": "Start index for baseline region in post-processing. NumPy style indexing.",
+                    "format": "int32",
+                    "type": [
+                        "integer",
+                        "null"
+                    ]
+                },
+                "baseline_stop_index": {
+                    "description": "Stop index for baseline region in post-processing. Numpy style indexing.",
+                    "format": "int32",
+                    "type": [
+                        "integer",
+                        "null"
+                    ]
+                },
+                "coupling": {
+                    "enum": [
+                        "AC",
+                        "DC"
+                    ],
+                    "title": "coupling_mode",
+                    "type": "string"
+                },
+                "dc_offset": {
+                    "description": "DC offset for this channel in millivolts. Can be negative or positive.",
+                    "format": "int32",
+                    "type": "integer"
+                },
+                "diff_input": {
+                    "description": "Enable differential input coupling. Not all CompuScope models support differential input coupling.",
+                    "type": "boolean"
+                },
+                "direct_adc": {
+                    "description": "Enable direct-to-ADC input coupling. Not all CompuScope models support direct-to-ADC input coupling.",
+                    "type": "boolean"
+                },
+                "filter": {
+                    "description": "Enable low-pass filtering. Not all CopuScope models support low-pass filtering.",
+                    "type": "boolean"
+                },
+                "impedance": {
+                    "enum": [
+                        "fifty",
+                        "onemeg"
+                    ],
+                    "title": "impedance_mode",
+                    "type": "string"
+                },
+                "invert": {
+                    "description": "If true, post-processed signal is inverted.",
+                    "type": "boolean"
+                },
+                "range": {
+                    "description": "Full input range in millivolts.",
+                    "format": "int32",
+                    "type": "integer"
+                },
+                "signal_start_index": {
+                    "description": "Start index for signal region in post-processing. NumPy style indexing.",
+                    "format": "int32",
+                    "type": "integer"
+                },
+                "signal_stop_index": {
+                    "description": "Stop index for signal region in post-processing. Numpy style indexing.",
+                    "format": "int32",
+                    "type": "integer"
+                },
+                "use_baseline": {
+                    "description": "Enable baseline subtraction for post-processing.",
+                    "type": "boolean"
+                }
+            },
+            "required": [
+                "range",
+                "coupling",
+                "impedance",
+                "diff_input",
+                "direct_adc",
+                "filter",
+                "dc_offset",
+                "signal_start_index",
+                "signal_stop_index",
+                "use_baseline",
+                "invert"
+            ],
+            "title": "channel",
+            "type": "object"
+        },
+        "trigger": {
+            "properties": {
+                "condition": {
+                    "description": "Trigger condition. Refer to the CompuScope documentation for valid values.",
+                    "format": "int32",
+                    "type": "integer"
+                },
+                "coupling": {
+                    "enum": [
+                        "AC",
+                        "DC"
+                    ],
+                    "title": "coupling_mode",
+                    "type": "string"
+                },
+                "impedance": {
+                    "enum": [
+                        "fifty",
+                        "onemeg"
+                    ],
+                    "title": "impedance_mode",
+                    "type": "string"
+                },
+                "level": {
+                    "description": "Trigger level as a perentage of the input range of the trigger source (half the full scale input range). For example, in the 2000 mV range at 0 DC offset, 50 would be positive 50% of 1 Volt, or 500 millivolts.",
+                    "format": "int32",
+                    "type": "integer"
+                },
+                "range": {
+                    "description": "Full input range in millivolts.",
+                    "format": "int32",
+                    "type": "integer"
+                },
+                "source": {
+                    "description": "Trigger source. Refer to the CompuScope documentation for valid values.",
+                    "format": "int32",
+                    "type": "integer"
+                }
+            },
+            "required": [
+                "range",
+                "condition",
+                "level",
+                "source",
+                "coupling",
+                "impedance"
+            ],
+            "title": "trigger",
+            "type": "object"
+        },
+        "voltage_range": {
+            "properties": {
+                "max": {
+                    "format": "double",
+                    "type": "number"
+                },
+                "min": {
+                    "format": "double",
+                    "type": "number"
+                }
+            },
+            "required": [
+                "min",
+                "max"
+            ],
+            "title": "voltage_range",
+            "type": "object"
+        }
+    },
+    "patternProperties": {
+        "^[a-zA-Z_][a-zA-Z0-9_]*$": {
+            "additionalProperties": false,
+            "properties": {
+                "channels": {
+                    "default": [],
+                    "items": {
+                        "$ref": "#/definitions/channel"
+                    },
+                    "type": [
+                        "array",
+                        "null"
+                    ]
+                },
+                "depth": {
+                    "default": 240,
+                    "description": "Post-trigger depth, in samples.",
+                    "format": "int32",
+                    "type": [
+                        "integer",
+                        "null"
+                    ]
+                },
+                "enable": {
+                    "default": true,
+                    "description": "Disable this daemon. The kind entry-point will not attempt to start this daemon.",
+                    "type": [
+                        "boolean",
+                        "null"
+                    ]
+                },
+                "ext_clk": {
+                    "default": false,
+                    "description": "Enable or disable external clocking functionality. If external clocking is activated, the sample rate must be set to the external clocking frequency. Not all CompuScope hardware supports external clocking.",
+                    "type": [
+                        "boolean",
+                        "null"
+                    ]
+                },
+                "log_level": {
+                    "default": "info",
+                    "description": "Set daemon log-level.",
+                    "enum": [
+                        "debug",
+                        "info",
+                        "notice",
+                        "warning",
+                        "error",
+                        "critical",
+                        "alert",
+                        "emergency"
+                    ],
+                    "title": "level",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "log_to_file": {
+                    "default": false,
+                    "description": "Optionally force logging to a file.",
+                    "type": [
+                        "boolean",
+                        "null"
+                    ]
+                },
+                "loop_at_startup": {
+                    "default": false,
+                    "description": "If set to true, the daemon will begin to loop measure as soon as it starts.",
+                    "type": [
+                        "boolean",
+                        "null"
+                    ]
+                },
+                "make": {
+                    "default": null,
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "mode": {
+                    "default": 1073741828,
+                    "description": "Sets the operating mode of the CompuScope system. Refer to the CompuScope documentation for valid values. Default is 1073741828 for FirmWare Averaging and four channels.",
+                    "format": "int32",
+                    "type": [
+                        "integer",
+                        "null"
+                    ]
+                },
+                "model": {
+                    "default": null,
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "port": {
+                    "description": "TCP port for daemon to occupy.",
+                    "format": "int32",
+                    "type": "integer"
+                },
+                "sample_rate": {
+                    "default": null,
+                    "description": "Sampling rate in Hertz. If not provided, model-dependent default is used.",
+                    "format": "int32",
+                    "type": [
+                        "integer",
+                        "null"
+                    ]
+                },
+                "segment_bins": {
+                    "additionalProperties": {
+                        "$ref": "#/definitions/voltage_range"
+                    },
+                    "default": {},
+                    "type": [
+                        "object",
+                        "null"
+                    ]
+                },
+                "segment_size": {
+                    "default": 240,
+                    "description": "Size of the segment to capture. A segment is the sum of the pre- and post-trigger samples that are to be acquired.",
+                    "format": "int32",
+                    "type": [
+                        "integer",
+                        "null"
+                    ]
+                },
+                "serial": {
+                    "default": null,
+                    "description": "Serial number for the particular device represented by the daemon",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "time_stamp_clock": {
+                    "default": "Fixed",
+                    "description": "The time-stamping clock may operate in one of two modes. In fixed mode, the on-board oscillator will be used as the counter source. In sample mode, a frequency derived from the sampling clock will be used as the counter source.",
+                    "enum": [
+                        "Fixed",
+                        "Sample"
+                    ],
+                    "title": "time_stamp_clock_mode",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "time_stamp_mode": {
+                    "default": "Free",
+                    "description": "The time-stamping counter may be reset upon the start of each acquisition or left free-running.",
+                    "enum": [
+                        "Free",
+                        "Reset"
+                    ],
+                    "title": "time_stampmode",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "trigger_delay": {
+                    "default": 0,
+                    "description": "Number of samples to acquire between the occurance of the trigger event and the actual logging of the trigger event. By using this you can more easily capture signals far away from the trigger. Not all CompuScope models support TriggerDelay.",
+                    "format": "int32",
+                    "type": [
+                        "integer",
+                        "null"
+                    ]
+                },
+                "trigger_hold_off": {
+                    "default": 0,
+                    "description": "Number of samples during which trigger events will be ignored after the system begins capturing. This is useful for ensuring the accumulation of a specified amount of pre-trigger data.",
+                    "format": "int32",
+                    "type": [
+                        "integer",
+                        "null"
+                    ]
+                },
+                "trigger_time_out": {
+                    "default": 1000000,
+                    "description": "Trigger timeout of the CompuScope system. The value is in 100 nanosecond units of time (e.g. a value of 10,000,000 gives a trigger timeout of 1 second). A value of -1 will cause the driver to wait indefinitely for a trigger.",
+                    "format": "int32",
+                    "type": [
+                        "integer",
+                        "null"
+                    ]
+                },
+                "triggers": {
+                    "default": [],
+                    "items": {
+                        "$ref": "#/definitions/trigger"
+                    },
+                    "type": [
+                        "array",
+                        "null"
+                    ]
+                }
+            },
+            "required": [
+                "port"
+            ],
+            "type": "object"
+        }
+    },
+    "title": "config",
+    "type": "object"
+}

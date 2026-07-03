@@ -103,26 +103,20 @@ default = false
 
 [config.time_stamp_mode]
 doc = "The time-stamping counter may be reset upon the start of each acquisition or left free-running."
-type = "enum"
-name = "time_stampmode"
-symbols = ["Free", "Reset"]
+type = {"name"="time_stampmode","type"="enum", symbols=["Free", "Reset"]}
 default = "Free"
 
 [config.time_stamp_clock]
 doc = "The time-stamping clock may operate in one of two modes. In fixed mode, the on-board oscillator will be used as the counter source. In sample mode, a frequency derived from the sampling clock will be used as the counter source."
-type = "enum"
-name = "time_stamp_clock_mode"
-symbols = ["Fixed", "Sample"]
+type = {"type"="enum", "name"="time_stamp_clock_mode", "symbols"=["Fixed", "Sample"]}
 default = "Fixed"
 
 [config.channels]
-type = "array"
-items = "channel"
+type = {"type"="array", "items"="channel"}
 default = []
 
 [config.triggers]
-type = "array"
-items = "trigger"
+type = {"type"="array", "items"="trigger"}
 default = []
 
 [state]
