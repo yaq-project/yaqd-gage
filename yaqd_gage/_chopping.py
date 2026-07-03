@@ -3,7 +3,6 @@ __all__ = ["CompuScope"]
 
 import asyncio
 import time
-from typing import Dict, Any, List
 
 import numpy as np  # type: ignore
 
@@ -40,8 +39,8 @@ class CompuScope(GaGeSynchronous):
                 f"{pre}i0_diff_ad",
             ]
         self._channel_units = {k: "V" if k.startswith("a") else None for k in self._channel_names}
-        self._samples: Dict[str, np.ndarray] = dict()
-        self._segments: Dict[str, np.ndarray] = dict()
+        self._samples: dict[str, np.ndarray] = dict()
+        self._segments: dict[str, np.ndarray] = dict()
 
     @uses_pygage
     def _config_pygage(self):
@@ -72,7 +71,6 @@ class CompuScope(GaGeSynchronous):
             self.logger.info(f"{k}: {acq.get(k)} | {config.get(k)}")
         config["SegmentCount"] = self._state["segment_count"]
         self._pg.set_acquisition_config(config)
-        self._pg.set_multiple_rec_average_count(self._state["record_count"])
         # channel config
         for channel_index, channel in enumerate(self._config["channels"]):
             self.logger.info(f"{channel_index=}")
@@ -112,23 +110,18 @@ class CompuScope(GaGeSynchronous):
     def get_measured_segments(self):
         return self._segments
 
-    def get_record_count(self) -> int:
-        return self._state["record_count"]
-
     @async_uses_pygage
     async def _measure(self):
         out = dict()
         # apply state variables
         photon_threshold = self._state["photon_threshold"]
         segment_count = self._state["segment_count"]
-        record_count = self._state["record_count"]
         self._pg.set_acquisition_config({"SegmentCount": segment_count})
-        self._pg.set_multiple_rec_average_count(record_count)
         self._pg.commit()
         self._max_segment_count = self._pg.max_segment_count
         # start capture
         # TODO: settable channels for bins, signal
-        shots = await self._capture_and_fetch([0, 3], segment_count, record_count)
+        shots = await self._capture_and_fetch([0, 3], segment_count)
 
         self._segments = shots
         t_start = time.time()
@@ -190,9 +183,6 @@ class CompuScope(GaGeSynchronous):
     def set_edge_width_count(self, count: int) -> None:
         assert count >= 0  # no limits_getter atm
         self._state["edge_width_count"] = count
-
-    def set_record_count(self, count: int) -> None:
-        self._state["record_count"] = count
 
     def set_photon_threshold(self, threshold) -> None:
         self._state["photon_threshold"] = threshold

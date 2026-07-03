@@ -10,7 +10,7 @@ from ._pygage import to_voltage
 
 
 class GaGeSynchronous(HasMeasureTrigger, IsSensor, IsDaemon):
-    """parent class for synchronous (non-streaming) acquisitions.  mostly daemons"""
+    """parent class for synchronous (non-streaming) acquisitions"""
 
     async def _capture_and_fetch(
         self,
@@ -43,7 +43,7 @@ class GaGeSynchronous(HasMeasureTrigger, IsSensor, IsDaemon):
         )
         self._pg.commit()
         for i in channel_indices:
-            shots = self._process_single_channel(i, segment_count, record_count, total_size)
+            shots = self._process_single_channel(i, segment_count, total_size, record_count)
             out.update({f"ai{i}": shots})
             await asyncio.sleep(0)
         self._pg.set_acquisition_config(
@@ -63,8 +63,8 @@ class GaGeSynchronous(HasMeasureTrigger, IsSensor, IsDaemon):
         self,
         channel_index: int,
         segment_count: int,
-        record_count: int,
         total_size: int,
+        record_count: int,
     ) -> np.array:
         system_info = self._pg.get_system_info()
         channel_info = self._pg.get_channel_config(channel_index + 1)
@@ -74,7 +74,7 @@ class GaGeSynchronous(HasMeasureTrigger, IsSensor, IsDaemon):
             start_position=0,
             transfer_length=total_size,
             segment_index=1,
-            transfer_mode=transfer_modes["data_32"],
+            transfer_mode=transfer_modes["default"],
         )[0]
         segs = np.array(segs, dtype=float).reshape(segment_count, -1)
         segs = to_voltage(

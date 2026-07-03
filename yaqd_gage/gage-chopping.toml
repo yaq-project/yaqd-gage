@@ -16,6 +16,12 @@ PyPI = "https://pypi.org/project/yaqd-gage"
 
 [[types]]
 type = "enum"
+name = "acquisition_mode"
+symbols = ["quad", "dual", "single"]
+default = "quad"
+
+[[types]]
+type = "enum"
 name = "coupling_mode"
 symbols = ["AC", "DC"]
 default = "DC"
@@ -29,19 +35,19 @@ default = "fifty"
 [[types]]
 type = "record"
 name = "channel"
-fields = [{"name"="range", "type"="int", "doc"="Full input range in millivolts."},
-          {"name"="coupling", "type"="coupling_mode"},
-	  {"name"="impedance", "type"="impedance_mode"},
-	  {"name"="diff_input", "type"="boolean", "default"=false, "doc"="Enable differential input coupling. Not all CompuScope models support differential input coupling."},
-	  {"name"="direct_adc", "type"="boolean", "default"=false, "doc"="Enable direct-to-ADC input coupling. Not all CompuScope models support direct-to-ADC input coupling."},
-	  {"name"="filter", "type"="boolean", "default"=false, "doc"="Enable low-pass filtering. Not all CopuScope models support low-pass filtering."},
-	  {"name"="dc_offset", "type"="int", "default"=0, "doc"="DC offset for this channel in millivolts. Can be negative or positive."},
-	  {"name"="signal_start_index", "type"="int", "default"=0, "doc"="Start index for signal region in post-processing. NumPy style indexing."},
-	  {"name"="signal_stop_index", "type"="int", "default"=-1, "doc"="Stop index for signal region in post-processing. Numpy style indexing."},
-	  {"name"="baseline_start_index", "type"=["null", "int"], "default"="__null__", "doc"="Start index for baseline region in post-processing. NumPy style indexing."},
-	  {"name"="baseline_stop_index", "type"=["null", "int"], "default"="__null__", "doc"="Stop index for baseline region in post-processing. Numpy style indexing."},
-	  {"name"="use_baseline", "type"="boolean", "default"=false, "doc"="Enable baseline subtraction for post-processing."},
-	  {"name"="invert", "type"="boolean", "default"=false, "doc"="If true, post-processed signal is inverted."}]
+fields = [
+	{"name"="range", "type"="int", "doc"="Full input range in millivolts."},
+	{"name"="coupling", "type"="coupling_mode"},
+	{"name"="impedance", "type"="impedance_mode"},
+	{"name"="filter", "type"="boolean", "default"=false, "doc"="Enable low-pass filtering. Not all CopuScope models support low-pass filtering."},
+	{"name"="dc_offset", "type"="int", "default"=0, "doc"="DC offset for this channel in millivolts. Can be negative or positive."},
+	{"name"="signal_start_index", "type"="int", "default"=0, "doc"="Start index for signal region in post-processing. NumPy style indexing."},
+	{"name"="signal_stop_index", "type"="int", "default"=-1, "doc"="Stop index for signal region in post-processing. Numpy style indexing."},
+	{"name"="baseline_start_index", "type"=["null", "int"], "default"="__null__", "doc"="Start index for baseline region in post-processing. NumPy style indexing."},
+	{"name"="baseline_stop_index", "type"=["null", "int"], "default"="__null__", "doc"="Stop index for baseline region in post-processing. Numpy style indexing."},
+	{"name"="use_baseline", "type"="boolean", "default"=false, "doc"="Enable baseline subtraction for post-processing."},
+	{"name"="invert", "type"="boolean", "default"=false, "doc"="If true, post-processed signal is inverted."}
+]
 
 [[types]]
 type = "record"
@@ -62,9 +68,9 @@ fields = [{"name"="min", "type"="double"},
 [config]
 
 [config.mode]
-doc = "Sets the operating mode of the CompuScope system. Refer to the CompuScope documentation for valid values. Default is 1073741828 for FirmWare Averaging and four channels."
-type = "int"
-default = 0x40000004
+doc = "Set how many channels will be used."
+type = "acquisition_mode"
+default = "quad"
 
 [config.sample_rate]
 doc = "Sampling rate in Hertz. If not provided, model-dependent default is used."
@@ -166,10 +172,6 @@ response = {"type"="map", "values"="ndarray"}
 doc = "Get all measured segments in a measurement."
 response = {"type"="map", "values"="ndarray"}
 
-[messages.get_record_count]
-doc = "Get the number of acquisitions that are averaged on-board via firmware."
-response = "int"
-
 [messages.get_segment_count]
 doc = "Get the currently planned number of chunks."
 response = "int"
@@ -184,10 +186,6 @@ request = [{"name"="count", "type"="int"}]
 
 [messages.set_segment_count]
 doc = "Set the chunk count."
-request = [{"name"="count", "type"="int"}]
-
-[messages.set_record_count]
-doc = "Set record count."
 request = [{"name"="count", "type"="int"}]
 
 [messages.get_photon_threshold]
@@ -212,13 +210,6 @@ getter = "get_edge_width_count"
 setter = "set_edge_width_count"
 type = "int"
 control_kind = "normal"
-record_kind = "metadata"
-
-[properties.record_count]
-getter = "get_record_count"
-setter = "set_record_count"
-type = "int"
-control_kind = "hinted"
 record_kind = "metadata"
 
 [properties.segment_count]
