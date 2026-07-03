@@ -1,10 +1,7 @@
 """Wrapper to normalize PyGage support."""
 
 import sys
-import time
 from functools import wraps
-
-import numpy as np  # type: ignore
 
 from ._exceptions import CompuScopeException
 from ._constants import transfer_modes

@@ -4,7 +4,7 @@ __all__ = ["CompuScope"]
 import asyncio
 import time
 
-import numpy as np  # type: ignore
+import numpy as np
 
 from ._pygage import PyGage, uses_pygage, async_uses_pygage
 from ._lib import GaGeSynchronous
@@ -12,6 +12,7 @@ from ._lib import GaGeSynchronous
 
 impedences = {"fifty": 50, "onemeg": 1_000_000}
 couplings = {"DC": 1, "AC": 2}
+acq_mode = {"quad": 4, "dual": 2, "single": 1}
 
 
 class CompuScope(GaGeSynchronous):
@@ -24,19 +25,17 @@ class CompuScope(GaGeSynchronous):
         self._max_segment_count = None  # redefined in _config_pygage
         self._tail_size = None
         self._config_pygage()
-        self._channel_names.append("ai1")
-        self._channel_names.append("ai2")
-        self._channel_names.append("ai3")
         for pre in "ap":
+            seed = f"{pre}i{self._config["signal_channel"]}"
             self._channel_names += [
-                f"{pre}i0",
-                f"{pre}i0_a",
-                f"{pre}i0_b",
-                f"{pre}i0_c",
-                f"{pre}i0_d",
-                f"{pre}i0_diff_abcd",
-                f"{pre}i0_diff_ab",
-                f"{pre}i0_diff_ad",
+                f"{seed}",
+                f"{seed}_a",
+                f"{seed}_b",
+                f"{seed}_c",
+                f"{seed}_d",
+                f"{seed}_diff_abcd",
+                f"{seed}_diff_ab",
+                f"{seed}_diff_ad",
             ]
         self._channel_units = {k: "V" if k.startswith("a") else None for k in self._channel_names}
         self._samples: dict[str, np.ndarray] = dict()
@@ -48,7 +47,7 @@ class CompuScope(GaGeSynchronous):
         self.logger.info(acq)
         # acqusition config
         config = {}
-        config["Mode"] = self._config["mode"]
+        config["Mode"] = acq_mode[self._config["mode"]]
         config["SampleRate"] = self._config["sample_rate"]
         config["Depth"] = self._config["depth"]
         config["SegmentSize"] = self._config["segment_size"]
@@ -120,14 +119,16 @@ class CompuScope(GaGeSynchronous):
         self._pg.commit()
         self._max_segment_count = self._pg.max_segment_count
         # start capture
-        # TODO: settable channels for bins, signal
-        shots = await self._capture_and_fetch([0, 3], segment_count)
+        i_sig = self._config["signal_channel"]
+        i_chop = self._config["chop_channel"]
+        ch_indices = set([i_sig, i_chop])
+        shots = await self._capture_and_fetch(ch_indices, segment_count)
 
         self._segments = shots
         t_start = time.time()
         # get edges
         if self._state["edge_width_count"]:
-            gradient = np.gradient(shots["ai3"])
+            gradient = np.gradient(shots[f"ai{i_chop}"])
             edges = np.abs(gradient) > 0.1
             edges = np.convolve(edges, np.full(self._state["edge_width_count"], True), mode="same")
         else:
@@ -137,8 +138,8 @@ class CompuScope(GaGeSynchronous):
         regions = {k: [] for k in self._config["segment_bins"].keys()}
         for k, v in self._config["segment_bins"].items():
             start = None
-            for i, voltage in enumerate(shots["ai3"]):
-                if v["min"] <= voltage <= v["max"] and i != shots["ai3"].size - 1 and not edges[i]:
+            for i, voltage in enumerate(shots[f"ai{i_chop}"]):
+                if v["min"] <= voltage <= v["max"] and i != shots[f"ai{i_chop}"].size - 1 and not edges[i]:
                     if start is None:
                         start = i
                 else:
@@ -151,25 +152,21 @@ class CompuScope(GaGeSynchronous):
         # segments: dict with keys of channel, values are 1D array of 1D arrays
         # count photon events
         # properties: photon_index, photon_threshold (perhaps dictionary for each channel?)
-        counts = np.array([shot > photon_threshold for shot in shots["ai0"]], dtype=bool)
-        out["pi0"] = counts.sum()
-        # take means
-        out["ai0"] = np.mean(shots["ai0"])
-        out["ai1"] = np.nan  # np.mean(segments["ai1"])
-        out["ai2"] = np.nan  # np.mean(segments["ai2"])
-        out["ai3"] = np.mean(shots["ai3"])
+        counts = np.array([shot > photon_threshold for shot in shots[f"ai{i_sig}"]], dtype=bool)
+        out[f"pi{i_sig}"] = counts.sum()
+        # take mean
+        out[f"ai{i_sig}"] = np.mean(shots[f"ai{i_sig}"])
 
         # chopping-derived channels
-        # TODO: remove hard-code ai0, put in config
         for phase in "abcd":
             if regions[phase]:
                 valid = np.r_[tuple(regions[phase])]
-                out[f"pi0_{phase}"] = np.mean(counts[valid])
-                out[f"ai0_{phase}"] = np.mean(shots["ai0"][valid])
+                out[f"pi{i_sig}_{phase}"] = np.mean(counts[valid])
+                out[f"ai{i_sig}_{phase}"] = np.mean(shots[f"ai{i_sig}"][valid])
             else:
                 out[f"pi0_{phase}"] = out[f"ai0_{phase}"] = np.nan
 
-        for key in ["pi0", "ai0"]:
+        for key in [f"pi{i_sig}", f"ai{i_sig}"]:
             out[f"{key}_diff_abcd"] = (
                 out[f"{key}_a"] - out[f"{key}_b"] + out[f"{key}_c"] - out[f"{key}_d"]
             )
