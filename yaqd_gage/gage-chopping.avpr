@@ -9,7 +9,7 @@
         },
         "chop_channel": {
             "default": 1,
-            "doc": "Set which channel is the chop indicator.",
+            "doc": "Set the chopping channel. Defaults to 1.",
             "type": "int"
         },
         "depth": {
@@ -69,7 +69,7 @@
         },
         "mode": {
             "default": "quad",
-            "doc": "Set how many channels will be active on board.",
+            "doc": "Set how many on-board channels will be active.",
             "type": "acquisition_mode"
         },
         "model": {
@@ -114,10 +114,15 @@
                 "string"
             ]
         },
-        "signal_channel": {
-            "default": 0,
-            "doc": "Set the signal channel. Defaults to 0.",
-            "type": "int"
+        "signal_channels": {
+            "default": [
+                0
+            ],
+            "doc": "A list of raw channel indices that are measured.",
+            "type": {
+                "items": "int",
+                "type": "array"
+            }
         },
         "time_stamp_clock": {
             "default": "Fixed",
@@ -463,11 +468,11 @@
             "type": "enum"
         },
         {
-            "default": "fifty",
+            "default": "low",
             "name": "impedance_mode",
             "symbols": [
-                "fifty",
-                "onemeg"
+                "low",
+                "high"
             ],
             "type": "enum"
         },
@@ -483,6 +488,7 @@
                     "type": "coupling_mode"
                 },
                 {
+                    "doc": "low (50 ohms) or high (1 MegaOhm)",
                     "name": "impedance",
                     "type": "impedance_mode"
                 },

@@ -63,7 +63,7 @@
             ]
         },
         "mode": {
-            "default": 1073741828,
+            "default": "quad",
             "doc": "Sets the operating mode of the CompuScope system. Refer to the CompuScope documentation for valid values. Default is 1073741825 for FirmWare Averaging",
             "type": "int"
         },
@@ -352,6 +352,16 @@
     ],
     "types": [
         {
+            "default": "quad",
+            "name": "acquisition_mode",
+            "symbols": [
+                "quad",
+                "dual",
+                "single"
+            ],
+            "type": "enum"
+        },
+        {
             "default": "DC",
             "name": "coupling_mode",
             "symbols": [
@@ -361,11 +371,11 @@
             "type": "enum"
         },
         {
-            "default": "fifty",
+            "default": "low",
             "name": "impedance_mode",
             "symbols": [
-                "fifty",
-                "onemeg"
+                "low",
+                "high"
             ],
             "type": "enum"
         },

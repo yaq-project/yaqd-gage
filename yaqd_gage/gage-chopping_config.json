@@ -16,7 +16,7 @@
             },
             "chop_channel": {
                 "default": 1,
-                "description": "Set which channel is the chop indicator.",
+                "description": "Set the chopping channel. Defaults to 1.",
                 "format": "int32",
                 "type": [
                     "integer",
@@ -92,7 +92,7 @@
             },
             "mode": {
                 "default": "quad",
-                "description": "Set how many channels will be active on board.",
+                "description": "Set how many on-board channels will be active.",
                 "enum": [
                     "quad",
                     "dual",
@@ -152,12 +152,17 @@
                     "null"
                 ]
             },
-            "signal_channel": {
-                "default": 0,
-                "description": "Set the signal channel. Defaults to 0.",
-                "format": "int32",
+            "signal_channels": {
+                "default": [
+                    0
+                ],
+                "description": "A list of raw channel indices that are measured.",
+                "items": {
+                    "format": "int32",
+                    "type": "integer"
+                },
                 "type": [
-                    "integer",
+                    "array",
                     "null"
                 ]
             },
@@ -264,9 +269,10 @@
                     "type": "boolean"
                 },
                 "impedance": {
+                    "description": "low (50 ohms) or high (1 MegaOhm)",
                     "enum": [
-                        "fifty",
-                        "onemeg"
+                        "low",
+                        "high"
                     ],
                     "title": "impedance_mode",
                     "type": "string"
@@ -326,8 +332,8 @@
                 },
                 "impedance": {
                     "enum": [
-                        "fifty",
-                        "onemeg"
+                        "low",
+                        "high"
                     ],
                     "title": "impedance_mode",
                     "type": "string"
@@ -394,7 +400,7 @@
                 },
                 "chop_channel": {
                     "default": 1,
-                    "description": "Set which channel is the chop indicator.",
+                    "description": "Set the chopping channel. Defaults to 1.",
                     "format": "int32",
                     "type": [
                         "integer",
@@ -470,7 +476,7 @@
                 },
                 "mode": {
                     "default": "quad",
-                    "description": "Set how many channels will be active on board.",
+                    "description": "Set how many on-board channels will be active.",
                     "enum": [
                         "quad",
                         "dual",
@@ -530,12 +536,17 @@
                         "null"
                     ]
                 },
-                "signal_channel": {
-                    "default": 0,
-                    "description": "Set the signal channel. Defaults to 0.",
-                    "format": "int32",
+                "signal_channels": {
+                    "default": [
+                        0
+                    ],
+                    "description": "A list of raw channel indices that are measured.",
+                    "items": {
+                        "format": "int32",
+                        "type": "integer"
+                    },
                     "type": [
-                        "integer",
+                        "array",
                         "null"
                     ]
                 },

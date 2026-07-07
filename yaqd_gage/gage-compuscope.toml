@@ -17,6 +17,12 @@ PyPI = "https://pypi.org/project/yaqd-gage"
 
 [[types]]
 type = "enum"
+name = "acquisition_mode"
+symbols = ["quad", "dual", "single"]
+default = "quad"
+
+[[types]]
+type = "enum"
 name = "coupling_mode"
 symbols = ["AC", "DC"]
 default = "DC"
@@ -24,42 +30,46 @@ default = "DC"
 [[types]]
 type = "enum"
 name = "impedance_mode"
-symbols = ["fifty", "onemeg"]
-default = "fifty"
+symbols = ["low", "high"]
+default = "low"
 
 [[types]]
 type = "record"
 name = "channel"
-fields = [{"name"="range", "type"="int", "doc"="Full input range in millivolts."},
-          {"name"="coupling", "type"="coupling_mode"},
-	  {"name"="impedance", "type"="impedance_mode"},
-	  {"name"="diff_input", "type"="boolean", "default"=false, "doc"="Enable differential input coupling. Not all CompuScope models support differential input coupling."},
-	  {"name"="direct_adc", "type"="boolean", "default"=false, "doc"="Enable direct-to-ADC input coupling. Not all CompuScope models support direct-to-ADC input coupling."},
-	  {"name"="filter", "type"="boolean", "default"=false, "doc"="Enable low-pass filtering. Not all CopuScope models support low-pass filtering."},
-	  {"name"="dc_offset", "type"="int", "default"=0, "doc"="DC offset for this channel in millivolts. Can be negative or positive."},
-	  {"name"="signal_start_index", "type"="int", "default"=0, "doc"="Start index for signal region in post-processing. NumPy style indexing."},
-	  {"name"="signal_stop_index", "type"="int", "default"=-1, "doc"="Stop index for signal region in post-processing. Numpy style indexing."},
-	  {"name"="baseline_start_index", "type"=["null", "int"], "default"="__null__", "doc"="Start index for baseline region in post-processing. NumPy style indexing."},
-	  {"name"="baseline_stop_index", "type"=["null", "int"], "default"="__null__", "doc"="Stop index for baseline region in post-processing. Numpy style indexing."},
-	  {"name"="use_baseline", "type"="boolean", "default"=false, "doc"="Enable baseline subtraction for post-processing."},
-	  {"name"="invert", "type"="boolean", "default"=false, "doc"="If true, post-processed signal is inverted."}]
+fields = [
+	{"name"="range", "type"="int", "doc"="Full input range in millivolts."},
+	{"name"="coupling", "type"="coupling_mode"},
+	{"name"="impedance", "type"="impedance_mode"},
+	{"name"="diff_input", "type"="boolean", "default"=false, "doc"="Enable differential input coupling. Not all CompuScope models support differential input coupling."},
+	{"name"="direct_adc", "type"="boolean", "default"=false, "doc"="Enable direct-to-ADC input coupling. Not all CompuScope models support direct-to-ADC input coupling."},
+	{"name"="filter", "type"="boolean", "default"=false, "doc"="Enable low-pass filtering. Not all CopuScope models support low-pass filtering."},
+	{"name"="dc_offset", "type"="int", "default"=0, "doc"="DC offset for this channel in millivolts. Can be negative or positive."},
+	{"name"="signal_start_index", "type"="int", "default"=0, "doc"="Start index for signal region in post-processing. NumPy style indexing."},
+	{"name"="signal_stop_index", "type"="int", "default"=-1, "doc"="Stop index for signal region in post-processing. Numpy style indexing."},
+	{"name"="baseline_start_index", "type"=["null", "int"], "default"="__null__", "doc"="Start index for baseline region in post-processing. NumPy style indexing."},
+	{"name"="baseline_stop_index", "type"=["null", "int"], "default"="__null__", "doc"="Stop index for baseline region in post-processing. Numpy style indexing."},
+	{"name"="use_baseline", "type"="boolean", "default"=false, "doc"="Enable baseline subtraction for post-processing."},
+	{"name"="invert", "type"="boolean", "default"=false, "doc"="If true, post-processed signal is inverted."}
+]
 
 [[types]]
 type = "record"
 name = "trigger"
-fields = [{"name"="range", "type"="int", "doc"="Full input range in millivolts."},
-          {"name"="condition", "type"="int", "doc"="Trigger condition. Refer to the CompuScope documentation for valid values."},
-          {"name"="level", "type"="float", "default"=0.0, "doc"="Trigger level as a perentage of the input range of the trigger source (half the full scale input range). For example, in the 2000 mV range at 0 DC offset, 50 would be positive 50% of 1 Volt, or 500 millivolts."},
-	  {"name"="source", "type"="int", "doc"="Trigger source. Refer to the CompuScope documentation for valid values."},
-	  {"name"="coupling", "type"="coupling_mode"},
-	  {"name"="impedance", "type"="impedance_mode"}]
+fields = [
+	{"name"="range", "type"="int", "doc"="Full input range in millivolts."},
+	{"name"="condition", "type"="int", "doc"="Trigger condition. Refer to the CompuScope documentation for valid values."},
+	{"name"="level", "type"="float", "default"=0.0, "doc"="Trigger level as a perentage of the input range of the trigger source (half the full scale input range). For example, in the 2000 mV range at 0 DC offset, 50 would be positive 50% of 1 Volt, or 500 millivolts."},
+	{"name"="source", "type"="int", "doc"="Trigger source. Refer to the CompuScope documentation for valid values."},
+	{"name"="coupling", "type"="coupling_mode"},
+	{"name"="impedance", "type"="impedance_mode"}
+]
 
 [config]
 
 [config.mode]
 doc = "Sets the operating mode of the CompuScope system. Refer to the CompuScope documentation for valid values. Default is 1073741825 for FirmWare Averaging"
 type = "int"
-default = 0x40000004
+default = "quad"
 
 [config.sample_rate]
 doc = "Sampling rate in Hertz. If not provided, model-dependent default is used."

@@ -20,18 +20,6 @@ class CompuScope(GaGeSynchronous):
         self._max_segment_count = None  # redefined in _config_pygage
         self._tail_size = None
         self._config_pygage()
-        for pre in "ap":
-            seed = f"{pre}i{self._config['signal_channel']}"
-            self._channel_names += [
-                f"{seed}",
-                f"{seed}_a",
-                f"{seed}_b",
-                f"{seed}_c",
-                f"{seed}_d",
-                f"{seed}_diff_abcd",
-                f"{seed}_diff_ab",
-                f"{seed}_diff_ad",
-            ]
         self._channel_units = {k: "V" if k.startswith("a") else None for k in self._channel_names}
         self._samples: dict[str, np.ndarray] = dict()
         self._segments: dict[str, np.ndarray] = dict()
@@ -67,9 +55,23 @@ class CompuScope(GaGeSynchronous):
         self._pg.set_acquisition_config(config)
         # channel config
         for channel_index, channel in enumerate(self._config["channels"]):
-            self.logger.info(f"{channel_index=}")
-            # cfg = self._pg.get_channel_config(channel_index)
-            # self.logger.info(cfg)
+            if channel["record"] or (channel_index == self._config["chop_channel"]):
+                for pre in "ap":
+                    seed = f"{pre}i{channel_index}"
+                    self._channel_names += [
+                        f"{seed}",
+                        f"{seed}_a",
+                        f"{seed}_b",
+                        f"{seed}_c",
+                        f"{seed}_d",
+                        f"{seed}_diff_abcd",
+                        f"{seed}_diff_ab",
+                        f"{seed}_diff_ad",
+                    ]
+            else:
+                continue
+            cfg = self._pg.get_channel_config(channel_index)
+            self.logger.debug(cfg)
             config = {}
             config["InputRange"] = channel["range"]
             config["Coupling"] = couplings[channel["coupling"]]
@@ -114,9 +116,9 @@ class CompuScope(GaGeSynchronous):
         self._pg.commit()
         self._max_segment_count = self._pg.max_segment_count
         # start capture
-        i_sig = self._config["signal_channel"]
+        i_sigs = self._config["signal_channel"]
         i_chop = self._config["chop_channel"]
-        ch_indices = set([i_sig, i_chop])
+        ch_indices = set(i_sigs + [i_chop])
         shots = await self._capture_and_fetch(ch_indices, segment_count)
 
         self._segments = shots
@@ -149,28 +151,27 @@ class CompuScope(GaGeSynchronous):
                         start = None
             await asyncio.sleep(0)
         # segments: dict with keys of channel, values are 1D array of 1D arrays
-        # count photon events
-        # properties: photon_index, photon_threshold (perhaps dictionary for each channel?)
-        counts = np.array([shot > photon_threshold for shot in shots[f"ai{i_sig}"]], dtype=bool)
-        out[f"pi{i_sig}"] = counts.sum()
-        # take mean
-        out[f"ai{i_sig}"] = np.mean(shots[f"ai{i_sig}"])
+        for i_sig in i_sigs:
+            counts = np.array([shot > photon_threshold for shot in shots[f"ai{i_sig}"]], dtype=bool)
+            out[f"pi{i_sig}"] = counts.sum()
+            # take mean
+            out[f"ai{i_sig}"] = np.mean(shots[f"ai{i_sig}"])
 
-        # chopping-derived channels
-        for phase in "abcd":
-            if regions[phase]:
-                valid = np.r_[tuple(regions[phase])]
-                out[f"pi{i_sig}_{phase}"] = np.mean(counts[valid])
-                out[f"ai{i_sig}_{phase}"] = np.mean(shots[f"ai{i_sig}"][valid])
-            else:
-                out[f"pi0_{phase}"] = out[f"ai0_{phase}"] = np.nan
+            # chopping-derived channels
+            for phase in "abcd":
+                if regions[phase]:
+                    valid = np.r_[tuple(regions[phase])]
+                    out[f"pi{i_sig}_{phase}"] = np.mean(counts[valid])
+                    out[f"ai{i_sig}_{phase}"] = np.mean(shots[f"ai{i_sig}"][valid])
+                else:
+                    out[f"pi{i_sig}_{phase}"] = out[f"ai{i_sig}_{phase}"] = np.nan
 
-        for key in [f"pi{i_sig}", f"ai{i_sig}"]:
-            out[f"{key}_diff_abcd"] = (
-                out[f"{key}_a"] - out[f"{key}_b"] + out[f"{key}_c"] - out[f"{key}_d"]
-            )
-            out[f"{key}_diff_ab"] = out[f"{key}_b"] - out[f"{key}_a"]
-            out[f"{key}_diff_ad"] = out[f"{key}_d"] - out[f"{key}_a"]
+            for key in [f"pi{i_sig}", f"ai{i_sig}"]:
+                out[f"{key}_diff_abcd"] = (
+                    out[f"{key}_a"] - out[f"{key}_b"] + out[f"{key}_c"] - out[f"{key}_d"]
+                )
+                out[f"{key}_diff_ab"] = out[f"{key}_b"] - out[f"{key}_a"]
+                out[f"{key}_diff_ad"] = out[f"{key}_d"] - out[f"{key}_a"]
         t_processed = time.time()
         self.logger.info(f"processing: {t_processed-t_start} sec")
 

@@ -29,8 +29,8 @@ default = "DC"
 [[types]]
 type = "enum"
 name = "impedance_mode"
-symbols = ["fifty", "onemeg"]
-default = "fifty"
+symbols = ["low", "high"]
+default = "low"
 
 [[types]]
 type = "record"
@@ -38,7 +38,7 @@ name = "channel"
 fields = [
 	{"name"="range", "type"="int", "doc"="Full input range in millivolts."},
 	{"name"="coupling", "type"="coupling_mode"},
-	{"name"="impedance", "type"="impedance_mode"},
+	{"name"="impedance", "type"="impedance_mode", "doc"="low (50 ohms) or high (1 MegaOhm)"},
 	{"name"="filter", "type"="boolean", "default"=false, "doc"="Enable low-pass filtering. Not all CopuScope models support low-pass filtering."},
 	{"name"="dc_offset", "type"="int", "default"=0, "doc"="DC offset for this channel in millivolts. Can be negative or positive."},
 	{"name"="signal_start_index", "type"="int", "default"=0, "doc"="Start index for signal region in post-processing. NumPy style indexing."},
@@ -46,7 +46,7 @@ fields = [
 	{"name"="baseline_start_index", "type"=["null", "int"], "default"="__null__", "doc"="Start index for baseline region in post-processing. NumPy style indexing."},
 	{"name"="baseline_stop_index", "type"=["null", "int"], "default"="__null__", "doc"="Stop index for baseline region in post-processing. Numpy style indexing."},
 	{"name"="use_baseline", "type"="boolean", "default"=false, "doc"="Enable baseline subtraction for post-processing."},
-	{"name"="invert", "type"="boolean", "default"=false, "doc"="If true, post-processed signal is inverted."}
+	{"name"="invert", "type"="boolean", "default"=false, "doc"="If true, post-processed signal is inverted."},
 ]
 
 [[types]]
@@ -70,19 +70,19 @@ fields = [{"name"="min", "type"="double"},
 [config]
 
 [config.mode]
-doc = "Set how many channels will be active on board."
+doc = "Set how many on-board channels will be active."
 type = "acquisition_mode"
 default = "quad"
 
 [config.chop_channel]
-doc = "Set which channel is the chop indicator."
+doc = "Set the chopping channel. Defaults to 1."
 type = "int"
 default = 1
 
-[config.signal_channel]
-doc = "Set the signal channel. Defaults to 0."
-type = "int"
-default = 0
+[config.signal_channels]
+doc = "A list of raw channel indices that are measured."
+type = {"type"="array", "items"="int"}
+default = [0]
 
 [config.sample_rate]
 doc = "Sampling rate in Hertz. If not provided, model-dependent default is used."
