@@ -68,8 +68,7 @@ class CompuScope(GaGeSynchronous):
                         f"{seed}_diff_ab",
                         f"{seed}_diff_ad",
                     ]
-            cfg = self._pg.get_channel_config(channel_index)
-            self.logger.debug(cfg)
+            self.logger.debug(f"{self._pg.get_channel_config(channel_index+1)=}")
             config = {}
             config["InputRange"] = channel["range"]
             config["Coupling"] = couplings[channel["coupling"]]
