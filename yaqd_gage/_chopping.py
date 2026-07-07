@@ -55,7 +55,7 @@ class CompuScope(GaGeSynchronous):
         self._pg.set_acquisition_config(config)
         # channel config
         for channel_index, channel in enumerate(self._config["channels"]):
-            if channel["record"] or (channel_index == self._config["chop_channel"]):
+            if channel_index in self._config["signal_channels"]:
                 for pre in "ap":
                     seed = f"{pre}i{channel_index}"
                     self._channel_names += [
@@ -68,8 +68,6 @@ class CompuScope(GaGeSynchronous):
                         f"{seed}_diff_ab",
                         f"{seed}_diff_ad",
                     ]
-            else:
-                continue
             cfg = self._pg.get_channel_config(channel_index)
             self.logger.debug(cfg)
             config = {}
@@ -97,7 +95,8 @@ class CompuScope(GaGeSynchronous):
             self._pg.set_trigger_config(trigger_index + 1, config)
         # finish
         self._pg.commit()
-        self._tail_size = self._pg.get_segment_tail_size()
+        # DDK: I guess size is in bits?
+        self._tail_size = self._pg.get_segment_tail_size() // 8
         self._max_segment_count = self._pg.max_segment_count
 
     def get_edge_width_count(self) -> int:
@@ -116,7 +115,7 @@ class CompuScope(GaGeSynchronous):
         self._pg.commit()
         self._max_segment_count = self._pg.max_segment_count
         # start capture
-        i_sigs = self._config["signal_channel"]
+        i_sigs = self._config["signal_channels"]
         i_chop = self._config["chop_channel"]
         ch_indices = set(i_sigs + [i_chop])
         shots = await self._capture_and_fetch(ch_indices, segment_count)
@@ -131,7 +130,7 @@ class CompuScope(GaGeSynchronous):
         else:
             edges = np.full(segment_count, False)
         # get regions
-        self._segments["regions"] = np.full(self._state["segment_count"], "", dtype="<U1")
+        self._segments["regions"] = np.full(segment_count, "", dtype="<U1")
         regions = {k: [] for k in self._config["segment_bins"].keys()}
         for k, v in self._config["segment_bins"].items():
             start = None

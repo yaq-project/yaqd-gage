@@ -143,11 +143,6 @@ default = {}
 
 [state]
 
-[state.record_count]
-doc = "Number of shots to collect and firmware-average."
-type = "int"
-default = 32
-
 [state.segment_count]
 doc = "Number of times to acquire record_count."
 type = "int"

@@ -49,7 +49,7 @@ class GaGeSynchronous(HasMeasureTrigger, IsSensor, IsDaemon):
         self._pg.commit()
         for i in channel_indices:
             shots = self._process_single_channel(i, segment_count, total_size, record_count)
-            out.update({f"ai{i}": shots})
+            out[f"ai{i}"] = shots
             await asyncio.sleep(0)
         self._pg.set_acquisition_config(
             {
@@ -81,30 +81,27 @@ class GaGeSynchronous(HasMeasureTrigger, IsSensor, IsDaemon):
             segment_index=1,
             transfer_mode=transfer_modes["default"],
         )[0]
-        segs = np.array(segs, dtype=float).reshape(segment_count, -1)
         segs = to_voltage(
-            segs,
+            segs.astype(float),
             record_count,
             system_info["SampleOffset"],
             channel_info["DcOffset"],
             channel_info["InputRange"],
             system_info["SampleResolution"],
-        )
+        ).reshape(segment_count, -1)
+        self._samples[f"ai{channel_index}"] = segs
         self.logger.info(segs.shape)
-        # since all segements are now polled simultaneously,
-        # users only view one sample trace for each measurement
-        self._samples[f"ai{channel_index}"] = segs[-1]
 
         # signal
         channel_config = self._config["channels"][channel_index]
         start = channel_config["signal_start_index"]
         stop = channel_config["signal_stop_index"]
-        signal = segs[start:stop].mean(axis=0)
+        signal = segs[:, start:stop].mean(axis=1)
         # baseline
         if channel_config["use_baseline"]:
             start = channel_config["baseline_start_index"]
             stop = channel_config["baseline_stop_index"]
-            baseline = segs[start:stop].mean(axis=0)
+            baseline = segs[:, start:stop].mean(axis=1)
             signal = signal - baseline
         # invert
         if channel_config["invert"]:
