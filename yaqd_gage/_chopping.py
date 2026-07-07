@@ -152,7 +152,9 @@ class CompuScope(GaGeSynchronous):
             await asyncio.sleep(0)
         # segments: dict with keys of channel, values are 1D array of 1D arrays
         for i_sig in i_sigs:
-            counts = np.array([shot > photon_threshold for shot in shots[f"ai{i_sig}"]], dtype=bool)
+            counts = np.array(
+                [shot > photon_threshold for shot in shots[f"ai{i_sig}"]], dtype=bool
+            )
             out[f"pi{i_sig}"] = counts.sum()
             # take mean
             out[f"ai{i_sig}"] = np.mean(shots[f"ai{i_sig}"])
