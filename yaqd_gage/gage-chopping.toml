@@ -39,14 +39,14 @@ fields = [
 	{"name"="range", "type"="int", "doc"="Full input range in millivolts."},
 	{"name"="coupling", "type"="coupling_mode"},
 	{"name"="impedance", "type"="impedance_mode", "doc"="low (50 ohms) or high (1 MegaOhm)"},
-	{"name"="filter", "type"="boolean", "default"=false, "doc"="Enable low-pass filtering. Not all CopuScope models support low-pass filtering."},
-	{"name"="dc_offset", "type"="int", "default"=0, "doc"="DC offset for this channel in millivolts. Can be negative or positive."},
-	{"name"="signal_start_index", "type"="int", "default"=0, "doc"="Start index for signal region in post-processing. NumPy style indexing."},
-	{"name"="signal_stop_index", "type"="int", "default"=-1, "doc"="Stop index for signal region in post-processing. Numpy style indexing."},
+	{"name"="filter", "type"=["null", "boolean"], "default"=false, "doc"="Enable low-pass filtering. Not all CopuScope models support low-pass filtering."},
+	{"name"="dc_offset", "type"=["null", "int"], "default"=0, "doc"="DC offset for this channel in millivolts. Can be negative or positive."},
+	{"name"="signal_start_index", "type"=["null", "int"], "default"=0, "doc"="Start index for signal region in post-processing. NumPy style indexing."},
+	{"name"="signal_stop_index", "type"=["null", "int"], "default"=-1, "doc"="Stop index for signal region in post-processing. Numpy style indexing."},
 	{"name"="baseline_start_index", "type"=["null", "int"], "default"="__null__", "doc"="Start index for baseline region in post-processing. NumPy style indexing."},
 	{"name"="baseline_stop_index", "type"=["null", "int"], "default"="__null__", "doc"="Stop index for baseline region in post-processing. Numpy style indexing."},
-	{"name"="use_baseline", "type"="boolean", "default"=false, "doc"="Enable baseline subtraction for post-processing."},
-	{"name"="invert", "type"="boolean", "default"=false, "doc"="If true, post-processed signal is inverted."},
+	{"name"="use_baseline", "type"=["null", "boolean"], "default"=false, "doc"="Enable baseline subtraction for post-processing."},
+	{"name"="invert", "type"=["null", "boolean"], "default"=false, "doc"="If true, post-processed signal is inverted."},
 ]
 
 [[types]]

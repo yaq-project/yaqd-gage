@@ -262,11 +262,17 @@
                 "dc_offset": {
                     "description": "DC offset for this channel in millivolts. Can be negative or positive.",
                     "format": "int32",
-                    "type": "integer"
+                    "type": [
+                        "integer",
+                        "null"
+                    ]
                 },
                 "filter": {
                     "description": "Enable low-pass filtering. Not all CopuScope models support low-pass filtering.",
-                    "type": "boolean"
+                    "type": [
+                        "boolean",
+                        "null"
+                    ]
                 },
                 "impedance": {
                     "description": "low (50 ohms) or high (1 MegaOhm)",
@@ -279,7 +285,10 @@
                 },
                 "invert": {
                     "description": "If true, post-processed signal is inverted.",
-                    "type": "boolean"
+                    "type": [
+                        "boolean",
+                        "null"
+                    ]
                 },
                 "range": {
                     "description": "Full input range in millivolts.",
@@ -289,28 +298,31 @@
                 "signal_start_index": {
                     "description": "Start index for signal region in post-processing. NumPy style indexing.",
                     "format": "int32",
-                    "type": "integer"
+                    "type": [
+                        "integer",
+                        "null"
+                    ]
                 },
                 "signal_stop_index": {
                     "description": "Stop index for signal region in post-processing. Numpy style indexing.",
                     "format": "int32",
-                    "type": "integer"
+                    "type": [
+                        "integer",
+                        "null"
+                    ]
                 },
                 "use_baseline": {
                     "description": "Enable baseline subtraction for post-processing.",
-                    "type": "boolean"
+                    "type": [
+                        "boolean",
+                        "null"
+                    ]
                 }
             },
             "required": [
                 "range",
                 "coupling",
-                "impedance",
-                "filter",
-                "dc_offset",
-                "signal_start_index",
-                "signal_stop_index",
-                "use_baseline",
-                "invert"
+                "impedance"
             ],
             "title": "channel",
             "type": "object"

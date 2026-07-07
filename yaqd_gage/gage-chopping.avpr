@@ -496,25 +496,37 @@
                     "default": false,
                     "doc": "Enable low-pass filtering. Not all CopuScope models support low-pass filtering.",
                     "name": "filter",
-                    "type": "boolean"
+                    "type": [
+                        "null",
+                        "boolean"
+                    ]
                 },
                 {
                     "default": 0,
                     "doc": "DC offset for this channel in millivolts. Can be negative or positive.",
                     "name": "dc_offset",
-                    "type": "int"
+                    "type": [
+                        "null",
+                        "int"
+                    ]
                 },
                 {
                     "default": 0,
                     "doc": "Start index for signal region in post-processing. NumPy style indexing.",
                     "name": "signal_start_index",
-                    "type": "int"
+                    "type": [
+                        "null",
+                        "int"
+                    ]
                 },
                 {
                     "default": -1,
                     "doc": "Stop index for signal region in post-processing. Numpy style indexing.",
                     "name": "signal_stop_index",
-                    "type": "int"
+                    "type": [
+                        "null",
+                        "int"
+                    ]
                 },
                 {
                     "default": null,
@@ -538,13 +550,19 @@
                     "default": false,
                     "doc": "Enable baseline subtraction for post-processing.",
                     "name": "use_baseline",
-                    "type": "boolean"
+                    "type": [
+                        "null",
+                        "boolean"
+                    ]
                 },
                 {
                     "default": false,
                     "doc": "If true, post-processed signal is inverted.",
                     "name": "invert",
-                    "type": "boolean"
+                    "type": [
+                        "null",
+                        "boolean"
+                    ]
                 }
             ],
             "name": "channel",
