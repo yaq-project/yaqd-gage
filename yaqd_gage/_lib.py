@@ -9,6 +9,11 @@ from ._constants import transfer_modes, acq_status_codes
 from ._pygage import to_voltage
 
 
+impedances = {"low": 50, "high": 1_000_000}
+couplings = {"DC": 1, "AC": 2}
+acq_mode = {"quad": 4, "dual": 2, "single": 1}
+
+
 class GaGeSynchronous(HasMeasureTrigger, IsSensor, IsDaemon):
     """parent class for synchronous (non-streaming) acquisitions"""
 

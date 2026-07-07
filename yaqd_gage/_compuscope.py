@@ -9,10 +9,7 @@ import numpy as np
 
 from ._constants import acq_status_codes
 from ._pygage import PyGage, uses_pygage, async_uses_pygage
-from ._lib import GaGeSynchronous
-
-impedences = {"fifty": 50, "onemeg": 1_000_000}
-couplings = {"DC": 1, "AC": 2}
+from ._lib import GaGeSynchronous, impedances, couplings, acq_mode
 
 
 class CompuScope(GaGeSynchronous):
@@ -61,7 +58,7 @@ class CompuScope(GaGeSynchronous):
             config = {}
             config["InputRange"] = channel["range"]
             config["Coupling"] = couplings[channel["coupling"]]
-            config["Impedance"] = impedences[channel["impedance"]]
+            config["Impedance"] = impedances[channel["impedance"]]
             config["Filter"] = int(channel["filter"])
             config["DcOffset"] = channel["dc_offset"]
             self._pg.set_channel_config(channel_index + 1, config)
@@ -72,7 +69,7 @@ class CompuScope(GaGeSynchronous):
             config["Level"] = int(trigger["level"])
             config["Source"] = trigger["source"]
             config["ExtRange"] = trigger["range"]
-            config["ExtImpedance"] = impedences[channel["impedance"]]
+            config["ExtImpedance"] = impedances[channel["impedance"]]
             config["ExtCoupling"] = couplings[channel["coupling"]]
             config["Relation"] = 0
             self._pg.set_trigger_config(trigger_index + 1, config)
