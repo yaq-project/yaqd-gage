@@ -431,11 +431,6 @@
             "doc": "Voltage at which photon events are counted.",
             "type": "float"
         },
-        "record_count": {
-            "default": 32,
-            "doc": "Number of shots to collect and firmware-average.",
-            "type": "int"
-        },
         "segment_count": {
             "default": 1000,
             "doc": "Number of times to acquire record_count.",
