@@ -89,7 +89,7 @@ class GaGeSynchronous(HasMeasureTrigger, IsSensor, IsDaemon):
             channel_info["InputRange"],
             system_info["SampleResolution"],
         ).reshape(segment_count, -1)
-        self._samples[f"ai{channel_index}"] = segs
+        self._samples[f"ai{channel_index}"] = segs[-1]
         self.logger.info(segs.shape)
 
         # signal
