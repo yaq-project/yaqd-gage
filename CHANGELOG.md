@@ -7,12 +7,19 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ### Added
 - new json schema file for configs
+- gage-chopping: photon counting (new output channels, new property `photon-threshold`
 
 ### Changed
+- config: "impedance mode" is now low, high enum
+- config: "mode" is now an enum
+- gage-compuscope: channel names changed to match those of gage-chopping
+- gage-chopping: record_count property removed
+- daemons no longer support xpert firmware
 - updated SDK: uses python 3.10-3.11
 - adc-to-voltage conversion formula now matches that of the SDK docs (64x different from previous formula)
 
 ### Fixed
+- huge decrease in data transfer time between board and computer
 - daemons will cleanly shut down on error or via client shutdown command (we release the hardware handle)
 
 ## [2026.1.0]
