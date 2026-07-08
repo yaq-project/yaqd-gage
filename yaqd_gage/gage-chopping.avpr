@@ -479,11 +479,12 @@
                     "type": "int"
                 },
                 {
+                    "doc": "AC or DC input coupling",
                     "name": "coupling",
                     "type": "coupling_mode"
                 },
                 {
-                    "doc": "low (50 ohms) or high (1 MegaOhm)",
+                    "doc": "low or high input impedance setting",
                     "name": "impedance",
                     "type": "impedance_mode"
                 },
@@ -587,10 +588,12 @@
                     "type": "int"
                 },
                 {
+                    "doc": "AC or DC input coupling",
                     "name": "coupling",
                     "type": "coupling_mode"
                 },
                 {
+                    "doc": "low or high input impedance setting",
                     "name": "impedance",
                     "type": "impedance_mode"
                 }

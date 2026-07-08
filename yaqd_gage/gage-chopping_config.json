@@ -252,6 +252,7 @@
                     ]
                 },
                 "coupling": {
+                    "description": "AC or DC input coupling",
                     "enum": [
                         "AC",
                         "DC"
@@ -275,7 +276,7 @@
                     ]
                 },
                 "impedance": {
-                    "description": "low (50 ohms) or high (1 MegaOhm)",
+                    "description": "low or high input impedance setting",
                     "enum": [
                         "low",
                         "high"
@@ -335,6 +336,7 @@
                     "type": "integer"
                 },
                 "coupling": {
+                    "description": "AC or DC input coupling",
                     "enum": [
                         "AC",
                         "DC"
@@ -343,6 +345,7 @@
                     "type": "string"
                 },
                 "impedance": {
+                    "description": "low or high input impedance setting",
                     "enum": [
                         "low",
                         "high"

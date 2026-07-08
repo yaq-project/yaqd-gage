@@ -37,8 +37,8 @@ type = "record"
 name = "channel"
 fields = [
 	{"name"="range", "type"="int", "doc"="Full input range in millivolts."},
-	{"name"="coupling", "type"="coupling_mode"},
-	{"name"="impedance", "type"="impedance_mode", "doc"="low (50 ohms) or high (1 MegaOhm)"},
+	{"name"="coupling", "type"="coupling_mode", "doc"="AC or DC input coupling"},
+	{"name"="impedance", "type"="impedance_mode", "doc"="low or high input impedance setting"},
 	{"name"="filter", "type"=["null", "boolean"], "default"=false, "doc"="Enable low-pass filtering. Not all CopuScope models support low-pass filtering."},
 	{"name"="dc_offset", "type"=["null", "int"], "default"=0, "doc"="DC offset for this channel in millivolts. Can be negative or positive."},
 	{"name"="signal_start_index", "type"=["null", "int"], "default"=0, "doc"="Start index for signal region in post-processing. NumPy style indexing."},
@@ -57,8 +57,8 @@ fields = [
 	{"name"="condition", "type"="int", "doc"="Trigger condition. Refer to the CompuScope documentation for valid values."},
 	{"name"="level", "type"="int", "default"=0, "doc"="Trigger level as a perentage of the input range of the trigger source (half the full scale input range). For example, in the 2000 mV range at 0 DC offset, 50 would be positive 50% of 1 Volt, or 500 millivolts."},
 	{"name"="source", "type"="int", "doc"="Trigger source. Refer to the CompuScope documentation for valid values."},
-	{"name"="coupling", "type"="coupling_mode"},
-	{"name"="impedance", "type"="impedance_mode"}
+	{"name"="coupling", "type"="coupling_mode", "doc"="AC or DC input coupling"},
+	{"name"="impedance", "type"="impedance_mode", "doc"="low or high input impedance setting"},
 ]
 
 [[types]]
