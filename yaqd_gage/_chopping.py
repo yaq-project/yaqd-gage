@@ -147,8 +147,6 @@ class CompuScope(GaGeSynchronous):
                         regions[k].append(sl)
                         self._segments["regions"][sl] = k
                         start = None
-            await asyncio.sleep(0)
-        # segments: dict with keys of channel, values are 1D array of 1D arrays
         for i_sig in i_sigs:
             counts = np.array(
                 [shot > photon_threshold for shot in shots[f"ai{i_sig}"]], dtype=bool
