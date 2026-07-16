@@ -1,10 +1,7 @@
 """Wrapper to normalize PyGage support."""
 
 import sys
-import time
 from functools import wraps
-
-import numpy as np  # type: ignore
 
 from ._exceptions import CompuScopeException
 from ._constants import transfer_modes
@@ -105,18 +102,27 @@ class PyGage(object):
         return self.interface.GetMulRecAverageCount(self.handle)
 
     @compuscope_error_handling
+    def get_segment_tail_size(self):
+        return self.interface.GetSegmentTailSizeInBytes(self.handle)
+
+    @compuscope_error_handling
     def get_status(self):
         return self.interface.GetStatus(self.handle)
+
+    @compuscope_error_handling
+    def get_system_caps(self, key):
+        return self.interface.GetSystemCaps(self.handle, key)
 
     @compuscope_error_handling
     def get_trigger_config(self, trigger_index):
         return self.interface.GetTriggerConfig(self.handle, trigger_index)
 
     @compuscope_error_handling
-    def get_system(self):
-        # I don't understand what the arguments to this function
-        # (the four zeros) do. It's working for me right now.
-        # - Blaise 2020-01-09
+    def get_system(self, board_type=0, channels=0, sample_bits=0, index=0):
+        """
+        select a specific board from the system
+        default arguments find the first available gage board
+        """
         handle = self.interface.GetSystem(0, 0, 0, 0)
         return handle
 

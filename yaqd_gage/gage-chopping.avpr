@@ -7,9 +7,14 @@
                 "type": "array"
             }
         },
+        "chop_channel": {
+            "default": 1,
+            "doc": "Set the chopping channel. Defaults to 1.",
+            "type": "int"
+        },
         "depth": {
             "default": 240,
-            "doc": "Post-trigger depth, in samples.",
+            "doc": "Post-trigger depth, in samples.  Numbers must be divisible by 16/[number of channels].",
             "type": "int"
         },
         "enable": {
@@ -63,9 +68,9 @@
             ]
         },
         "mode": {
-            "default": 1073741828,
-            "doc": "Sets the operating mode of the CompuScope system. Refer to the CompuScope documentation for valid values. Default is 1073741828 for FirmWare Averaging and four channels.",
-            "type": "int"
+            "default": "quad",
+            "doc": "Set how many on-board channels will be active.",
+            "type": "acquisition_mode"
         },
         "model": {
             "default": null,
@@ -109,6 +114,16 @@
                 "string"
             ]
         },
+        "signal_channels": {
+            "default": [
+                0
+            ],
+            "doc": "A list of raw channel indices that are measured.",
+            "type": {
+                "items": "int",
+                "type": "array"
+            }
+        },
         "time_stamp_clock": {
             "default": "Fixed",
             "doc": "The time-stamping clock may operate in one of two modes. In fixed mode, the on-board oscillator will be used as the counter source. In sample mode, a frequency derived from the sampling clock will be used as the counter source.",
@@ -144,7 +159,7 @@
             "type": "int"
         },
         "trigger_time_out": {
-            "default": 1000000,
+            "default": -1,
             "doc": "Trigger timeout of the CompuScope system. The value is in 100 nanosecond units of time (e.g. a value of 10,000,000 gives a trigger timeout of 1 second). A value of -1 will cause the driver to wait indefinitely for a trigger.",
             "type": "int"
         },
@@ -174,6 +189,10 @@
             "origin": "is-daemon",
             "request": [],
             "response": "boolean"
+        },
+        "get_acq_config": {
+            "request": [],
+            "response": "string"
         },
         "get_channel_names": {
             "doc": "Get current channel names.",
@@ -239,7 +258,7 @@
             }
         },
         "get_measured_samples": {
-            "doc": "Get a dictionary of 1D arrays of measured samples.",
+            "doc": "Get the scope traces of a single segment.",
             "request": [],
             "response": {
                 "type": "map",
@@ -247,7 +266,7 @@
             }
         },
         "get_measured_segments": {
-            "doc": "Get a dictionary of 1D arrays of measured segments.",
+            "doc": "Get all measured segments in a measurement.",
             "request": [],
             "response": {
                 "type": "map",
@@ -271,11 +290,6 @@
             "doc": "",
             "request": [],
             "response": "string"
-        },
-        "get_record_count": {
-            "doc": "Get the number of acquisitions that are averaged on-board via firmware.",
-            "request": [],
-            "response": "int"
         },
         "get_segment_count": {
             "doc": "Get the currently planned number of chunks.",
@@ -340,16 +354,6 @@
             ],
             "response": "null"
         },
-        "set_record_count": {
-            "doc": "Set record count.",
-            "request": [
-                {
-                    "name": "count",
-                    "type": "int"
-                }
-            ],
-            "response": "null"
-        },
         "set_segment_count": {
             "doc": "Set the chunk count.",
             "request": [
@@ -402,17 +406,6 @@
             "type": "float",
             "units_getter": "get_photon_threshold_units"
         },
-        "record_count": {
-            "control_kind": "hinted",
-            "dynamic": true,
-            "getter": "get_record_count",
-            "limits_getter": null,
-            "options_getter": null,
-            "record_kind": "metadata",
-            "setter": "set_record_count",
-            "type": "int",
-            "units_getter": null
-        },
         "segment_count": {
             "control_kind": "hinted",
             "dynamic": true,
@@ -438,11 +431,6 @@
             "doc": "Voltage at which photon events are counted.",
             "type": "float"
         },
-        "record_count": {
-            "default": 32,
-            "doc": "Number of shots to collect and firmware-average.",
-            "type": "int"
-        },
         "segment_count": {
             "default": 1000,
             "doc": "Number of times to acquire record_count.",
@@ -456,6 +444,16 @@
     ],
     "types": [
         {
+            "default": "quad",
+            "name": "acquisition_mode",
+            "symbols": [
+                "quad",
+                "dual",
+                "single"
+            ],
+            "type": "enum"
+        },
+        {
             "default": "DC",
             "name": "coupling_mode",
             "symbols": [
@@ -465,11 +463,11 @@
             "type": "enum"
         },
         {
-            "default": "fifty",
+            "default": "low",
             "name": "impedance_mode",
             "symbols": [
-                "fifty",
-                "onemeg"
+                "low",
+                "high"
             ],
             "type": "enum"
         },
@@ -481,48 +479,50 @@
                     "type": "int"
                 },
                 {
+                    "doc": "AC or DC input coupling",
                     "name": "coupling",
                     "type": "coupling_mode"
                 },
                 {
+                    "doc": "low or high input impedance setting",
                     "name": "impedance",
                     "type": "impedance_mode"
                 },
                 {
                     "default": false,
-                    "doc": "Enable differential input coupling. Not all CompuScope models support differential input coupling.",
-                    "name": "diff_input",
-                    "type": "boolean"
-                },
-                {
-                    "default": false,
-                    "doc": "Enable direct-to-ADC input coupling. Not all CompuScope models support direct-to-ADC input coupling.",
-                    "name": "direct_adc",
-                    "type": "boolean"
-                },
-                {
-                    "default": false,
                     "doc": "Enable low-pass filtering. Not all CopuScope models support low-pass filtering.",
                     "name": "filter",
-                    "type": "boolean"
+                    "type": [
+                        "null",
+                        "boolean"
+                    ]
                 },
                 {
                     "default": 0,
                     "doc": "DC offset for this channel in millivolts. Can be negative or positive.",
                     "name": "dc_offset",
-                    "type": "int"
+                    "type": [
+                        "null",
+                        "int"
+                    ]
                 },
                 {
                     "default": 0,
                     "doc": "Start index for signal region in post-processing. NumPy style indexing.",
                     "name": "signal_start_index",
-                    "type": "int"
+                    "type": [
+                        "null",
+                        "int"
+                    ]
                 },
                 {
                     "default": -1,
                     "doc": "Stop index for signal region in post-processing. Numpy style indexing.",
                     "name": "signal_stop_index",
-                    "type": "int"
+                    "type": [
+                        "null",
+                        "int"
+                    ]
                 },
                 {
                     "default": null,
@@ -546,13 +546,19 @@
                     "default": false,
                     "doc": "Enable baseline subtraction for post-processing.",
                     "name": "use_baseline",
-                    "type": "boolean"
+                    "type": [
+                        "null",
+                        "boolean"
+                    ]
                 },
                 {
                     "default": false,
                     "doc": "If true, post-processed signal is inverted.",
                     "name": "invert",
-                    "type": "boolean"
+                    "type": [
+                        "null",
+                        "boolean"
+                    ]
                 }
             ],
             "name": "channel",
@@ -582,10 +588,12 @@
                     "type": "int"
                 },
                 {
+                    "doc": "AC or DC input coupling",
                     "name": "coupling",
                     "type": "coupling_mode"
                 },
                 {
+                    "doc": "low or high input impedance setting",
                     "name": "impedance",
                     "type": "impedance_mode"
                 }
