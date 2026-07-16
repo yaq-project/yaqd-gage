@@ -7,7 +7,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ### Added
 - new json schema file for configs
-- gage-chopping: photon counting (new output channels, new property `photon-threshold`
+- gage-chopping: photon counting (new output channels, new property `photon-threshold`)
 
 ### Changed
 - config: "impedance mode" is now low, high enum
