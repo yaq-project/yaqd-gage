@@ -34,28 +34,33 @@ class GaGeSynchronous(HasMeasureTrigger, IsSensor, IsDaemon):
 
         t_measured = time.time()
         # read out
-        out = {}
         # trick the daq into thinking depth is the total size of the data
-        temp_depth = segment_count * (self._config["depth"] + self._tail_size)
-        temp_segment_size = segment_count * (self._config["segment_size"] + self._tail_size)
+        # for int16 output, 2 bytes per number, adjust tail accordingly
+        tail_size = self._tail_size_bytes // 2
+        n_channels = acq_mode[self._config["acquisition_mode"]]
+        temp_depth = n_channels * segment_count * (self._config["depth"] + tail_size)
+        temp_segment_size = n_channels * segment_count * (self._config["segment_size"] + tail_size)
         self.logger.debug(f"{temp_depth=}, {self._tail_size=}")
         self._pg.set_acquisition_config(
             {
                 "Depth": temp_depth,
                 "SegmentCount": 1,
                 "SegmentSize": temp_segment_size,
+                "Mode": 1,
             }
         )
         self._pg.commit()
-        for i in channel_indices:
-            shots = self._process_single_channel(i, segment_count, temp_depth, record_count)
-            out[f"ai{i}"] = shots
-            await asyncio.sleep(0)
+        out = {
+            f"ai{i}": v for i, v in enumerate(
+                self._process_channels(segment_count, temp_depth, record_count, n_channels)
+            )        
+        }
         self._pg.set_acquisition_config(
             {
                 "Depth": self._config["depth"],
                 "SegmentCount": segment_count,
                 "SegmentSize": self._config["segment_size"],
+                "Mode": n_channels,
             },
         )
         self._pg.commit()
@@ -63,6 +68,53 @@ class GaGeSynchronous(HasMeasureTrigger, IsSensor, IsDaemon):
         self.logger.info(f"measurement: {t_measured-t_start} sec")
         self.logger.info(f"data xt: {t_fetched-t_measured} sec")
         return out
+
+    def _process_channels(
+            self,
+            segment_count: int,
+            total_size: int, 
+            record_count: int,
+            n_channels: int,
+        ) -> dict:
+        system_info = self._pg.get_system_info()
+        buf, buf_start, buf_length  = self._pg.transfer_data(
+            channel_index=1,
+            start_position=0,
+            transfer_length=total_size,
+            segment_index=1,
+            transfer_mode=transfer_modes["default"],
+        )
+        buf = buf.reshape(segment_count, -1, n_channels)
+        channels = []
+        for channel_index in range(n_channels):
+            channel_info = self._pg.get_channel_config(channel_index + 1)
+            channel = to_voltage(
+                buf[..., channel_index].astype(float),
+                record_count,
+                system_info["SampleOffset"],
+                channel_info["DcOffset"],
+                channel_info["InputRange"],
+                system_info["SampleResolution"],
+            )
+            self._samples[f"ai{channel_index}"] = channel[-1]
+            self.logger.info(channel.shape)
+
+            # signal
+            channel_config = self._config["channels"][channel_index]
+            start = channel_config["signal_start_index"]
+            stop = channel_config["signal_stop_index"]
+            signal = channel[:, start:stop].mean(axis=1)
+            # baseline
+            if channel_config["use_baseline"]:
+                start = channel_config["baseline_start_index"]
+                stop = channel_config["baseline_stop_index"]
+                baseline = channel[:, start:stop].mean(axis=1)
+                signal = signal - baseline
+            # invert
+            if channel_config["invert"]:
+                signal *= -1
+            channels.append(signal)
+        return channels
 
     def _process_single_channel(
         self,
