@@ -76,7 +76,7 @@ class GaGeSynchronous(HasMeasureTrigger, IsSensor, IsDaemon):
         total_size: int,
         record_count: int,
         n_channels: int,
-    ) -> dict:
+    ) -> list:
         system_info = self._pg.get_system_info()
         buf, buf_start, buf_length = self._pg.transfer_data(
             channel_index=1,
