@@ -13,7 +13,6 @@ from yaqc_qtpy import _plot, qtype_items  # noqa
 
 import yaq_traits  # type: ignore
 
-
 colors = ["#cc6666", "#f0c674", "#8abeb7", "#b294bb"]  # red  # yellow  # aqua  # purple
 
 
