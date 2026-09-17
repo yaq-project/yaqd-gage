@@ -51,9 +51,10 @@ class GaGeSynchronous(HasMeasureTrigger, IsSensor, IsDaemon):
         )
         self._pg.commit()
         out = {
-            f"ai{i}": v for i, v in enumerate(
+            f"ai{i}": v
+            for i, v in enumerate(
                 self._process_channels(segment_count, temp_depth, record_count, n_channels)
-            )        
+            )
         }
         self._pg.set_acquisition_config(
             {
@@ -70,14 +71,14 @@ class GaGeSynchronous(HasMeasureTrigger, IsSensor, IsDaemon):
         return out
 
     def _process_channels(
-            self,
-            segment_count: int,
-            total_size: int, 
-            record_count: int,
-            n_channels: int,
-        ) -> dict:
+        self,
+        segment_count: int,
+        total_size: int,
+        record_count: int,
+        n_channels: int,
+    ) -> dict:
         system_info = self._pg.get_system_info()
-        buf, buf_start, buf_length  = self._pg.transfer_data(
+        buf, buf_start, buf_length = self._pg.transfer_data(
             channel_index=1,
             start_position=0,
             transfer_length=total_size,
