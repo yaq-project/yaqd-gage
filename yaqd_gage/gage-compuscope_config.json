@@ -82,7 +82,7 @@
                 ]
             },
             "mode": {
-                "default": 1073741828,
+                "default": "quad",
                 "description": "Sets the operating mode of the CompuScope system. Refer to the CompuScope documentation for valid values. Default is 1073741825 for FirmWare Averaging",
                 "format": "int32",
                 "type": [
@@ -249,8 +249,8 @@
                 },
                 "impedance": {
                     "enum": [
-                        "fifty",
-                        "onemeg"
+                        "low",
+                        "high"
                     ],
                     "title": "impedance_mode",
                     "type": "string"
@@ -312,8 +312,8 @@
                 },
                 "impedance": {
                     "enum": [
-                        "fifty",
-                        "onemeg"
+                        "low",
+                        "high"
                     ],
                     "title": "impedance_mode",
                     "type": "string"
@@ -428,7 +428,7 @@
                     ]
                 },
                 "mode": {
-                    "default": 1073741828,
+                    "default": "quad",
                     "description": "Sets the operating mode of the CompuScope system. Refer to the CompuScope documentation for valid values. Default is 1073741825 for FirmWare Averaging",
                     "format": "int32",
                     "type": [
