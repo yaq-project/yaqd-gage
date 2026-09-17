@@ -29,8 +29,9 @@ class CompuScope(GaGeSynchronous):
         acq = self._pg.get_acquisition_config()
         self.logger.info(acq)
         # acqusition config
+        mode = acq_mode[self._config["mode"]]
         config = {}
-        config["Mode"] = acq_mode[self._config["mode"]]
+        config["Mode"] = mode
         config["SampleRate"] = self._config["sample_rate"]
         config["Depth"] = self._config["depth"]
         config["SegmentSize"] = self._config["segment_size"]
@@ -94,9 +95,9 @@ class CompuScope(GaGeSynchronous):
             self._pg.set_trigger_config(trigger_index + 1, config)
         # finish
         self._pg.commit()
-        self._tail_size_bytes = self._pg.get_segment_tail_size() // 8
-        # DDK: tail size reported in bytes; I believe it is split among all channels measured
-        self._tail_size_bytes /= config["mode"]
+        self._tail_size_bytes = self._pg.get_segment_tail_size()
+        # DDK: tail size reported in bytes and split among all used channels
+        self._tail_size_bytes //= mode
         self._max_segment_count = self._pg.max_segment_count
 
     def get_edge_width_count(self) -> int:

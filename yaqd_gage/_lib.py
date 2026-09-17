@@ -37,7 +37,7 @@ class GaGeSynchronous(HasMeasureTrigger, IsSensor, IsDaemon):
         # trick the daq into thinking depth is the total size of the data
         # for int16 output, 2 bytes per number, adjust tail accordingly
         tail_size = self._tail_size_bytes // 2
-        n_channels = acq_mode[self._config["acquisition_mode"]]
+        n_channels = acq_mode[self._config["mode"]]
         temp_depth = n_channels * segment_count * (self._config["depth"] + tail_size)
         temp_segment_size = n_channels * segment_count * (self._config["segment_size"] + tail_size)
         self.logger.debug(f"{temp_depth=}, {self._tail_size=}")
