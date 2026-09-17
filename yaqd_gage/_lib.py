@@ -117,51 +117,6 @@ class GaGeSynchronous(HasMeasureTrigger, IsSensor, IsDaemon):
             channels.append(signal)
         return channels
 
-    def _process_single_channel(
-        self,
-        channel_index: int,
-        segment_count: int,
-        total_size: int,
-        record_count: int,
-    ) -> np.array:
-        system_info = self._pg.get_system_info()
-        channel_info = self._pg.get_channel_config(channel_index + 1)
-
-        segs = self._pg.transfer_data(
-            channel_index=channel_index + 1,
-            start_position=0,
-            transfer_length=total_size,
-            segment_index=1,
-            transfer_mode=transfer_modes["default"],
-        )[0]
-        segs = to_voltage(
-            segs.astype(float),
-            record_count,
-            system_info["SampleOffset"],
-            channel_info["DcOffset"],
-            channel_info["InputRange"],
-            system_info["SampleResolution"],
-        ).reshape(segment_count, -1)
-        self._samples[f"ai{channel_index}"] = segs[-1]
-        self.logger.info(segs.shape)
-
-        # signal
-        channel_config = self._config["channels"][channel_index]
-        start = channel_config["signal_start_index"]
-        stop = channel_config["signal_stop_index"]
-        signal = segs[:, start:stop].mean(axis=1)
-        # baseline
-        if channel_config["use_baseline"]:
-            start = channel_config["baseline_start_index"]
-            stop = channel_config["baseline_stop_index"]
-            baseline = segs[:, start:stop].mean(axis=1)
-            signal = signal - baseline
-        # invert
-        if channel_config["invert"]:
-            signal *= -1
-
-        return signal
-
     def set_segment_count(self, count: int) -> None:
         self._state["segment_count"] = count
 
