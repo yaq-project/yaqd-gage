@@ -40,7 +40,7 @@ class GaGeSynchronous(HasMeasureTrigger, IsSensor, IsDaemon):
         n_channels = acq_mode[self._config["mode"]]
         temp_depth = n_channels * segment_count * (self._config["depth"] + tail_size)
         temp_segment_size = n_channels * segment_count * (self._config["segment_size"] + tail_size)
-        self.logger.debug(f"{temp_depth=}, {self._tail_size=}")
+        self.logger.debug(f"{temp_depth=}, {tail_size=}")
         self._pg.set_acquisition_config(
             {
                 "Depth": temp_depth,
