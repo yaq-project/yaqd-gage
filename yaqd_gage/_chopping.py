@@ -18,7 +18,7 @@ class CompuScope(GaGeSynchronous):
         self._pg = PyGage()
         self._channel_names = []
         self._max_segment_count = None  # redefined in _config_pygage
-        self._tail_size = None
+        self._tail_size_bytes = None
         self._config_pygage()
         self._channel_units = {k: "V" if k.startswith("a") else None for k in self._channel_names}
         self._samples: dict[str, np.ndarray] = dict()
@@ -94,8 +94,9 @@ class CompuScope(GaGeSynchronous):
             self._pg.set_trigger_config(trigger_index + 1, config)
         # finish
         self._pg.commit()
-        # DDK: I guess size is in bits?
-        self._tail_size = self._pg.get_segment_tail_size() // 8
+        self._tail_size_bytes = self._pg.get_segment_tail_size() // 8
+        # DDK: tail size reported in bytes; I believe it is split among all channels measured
+        self._tail_size_bytes /= config["mode"]
         self._max_segment_count = self._pg.max_segment_count
 
     def get_edge_width_count(self) -> int:
