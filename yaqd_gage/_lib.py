@@ -98,7 +98,7 @@ class GaGeSynchronous(HasMeasureTrigger, IsSensor, IsDaemon):
                 channel_info["InputRange"],
                 system_info["SampleResolution"],
             )
-            self._samples[f"ai{channel_index}"] = channel[-1, :-(self._tail_size_bytes // 2)]
+            self._samples[f"ai{channel_index}"] = channel[-1, : -(self._tail_size_bytes // 2)]
 
             # signal
             channel_config = self._config["channels"][channel_index]
