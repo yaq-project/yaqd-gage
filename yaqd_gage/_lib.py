@@ -86,6 +86,7 @@ class GaGeSynchronous(HasMeasureTrigger, IsSensor, IsDaemon):
             transfer_mode=transfer_modes["default"],
         )
         buf = buf.reshape(segment_count, -1, n_channels)
+        self.logger.info(buf.shape)
         channels = []
         for channel_index in range(n_channels):
             channel_info = self._pg.get_channel_config(channel_index + 1)
@@ -97,8 +98,7 @@ class GaGeSynchronous(HasMeasureTrigger, IsSensor, IsDaemon):
                 channel_info["InputRange"],
                 system_info["SampleResolution"],
             )
-            self._samples[f"ai{channel_index}"] = channel[-1]
-            self.logger.info(channel.shape)
+            self._samples[f"ai{channel_index}"] = channel[-1, :-(self._tail_size_bytes // 2)]
 
             # signal
             channel_config = self._config["channels"][channel_index]
